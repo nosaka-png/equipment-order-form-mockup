@@ -1,0 +1,498 @@
+/* ============================================
+   備品発注フォーム モックアップ - 共通スタイル
+   ============================================ */
+
+/* --- リセット & ベース --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+body {
+  font-family: "Hiragino Kaku Gothic ProN", "Meiryo", "Yu Gothic", sans-serif;
+  background: #f4f6f9;
+  color: #333;
+  min-height: 100vh;
+}
+
+/* --- ヘッダー --- */
+.header {
+  background: #fff;
+  border-bottom: 2px solid #e0e0e0;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.header__role {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.header__role--dir {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+}
+
+.header__role--azlogi {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+/* --- ナビゲーションリンク --- */
+.nav-link {
+  display: inline-block;
+  margin: 16px 24px 0;
+  font-size: 0.85rem;
+  color: #1976d2;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  text-decoration: underline;
+}
+
+/* --- メインコンテンツ --- */
+.main {
+  max-width: 960px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+/* --- セクション --- */
+.section {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.section__header {
+  background: #fafafa;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #444;
+}
+
+.section__body {
+  padding: 20px;
+}
+
+/* --- フォーム要素 --- */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.form-label .required {
+  color: #d32f2f;
+  font-size: 0.8rem;
+  margin-left: 4px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
+}
+
+.form-input--short {
+  width: 120px;
+}
+
+.form-input--medium {
+  width: 240px;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-inline {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.form-inline .form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* --- テーブル --- */
+.table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e8e8e8;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.data-table th {
+  background: #f5f7fa;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.85rem;
+  position: sticky;
+  top: 0;
+}
+
+.data-table tbody tr:hover {
+  background: #f0f6ff;
+}
+
+.data-table td input[type="number"] {
+  width: 70px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.data-table td input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* 在庫ステータス表示 */
+.stock-ok {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.stock-low {
+  color: #e65100;
+  font-weight: 600;
+}
+
+.stock-out {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+/* --- ラジオボタングループ --- */
+.radio-group {
+  display: flex;
+  gap: 24px;
+  padding: 4px 0;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.radio-group input[type="radio"] {
+  width: 16px;
+  height: 16px;
+}
+
+/* --- ボタン --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: #1976d2;
+  color: #fff;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: #1565c0;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
+}
+
+.btn--success {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.btn--success:hover:not(:disabled) {
+  background: #1b5e20;
+  box-shadow: 0 2px 6px rgba(46, 125, 50, 0.3);
+}
+
+.btn--warning {
+  background: #e65100;
+  color: #fff;
+}
+
+.btn--warning:hover:not(:disabled) {
+  background: #bf360c;
+}
+
+.btn-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: flex-end;
+}
+
+/* --- 閲覧専用テーブル --- */
+.readonly-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.readonly-table th,
+.readonly-table td {
+  padding: 8px 14px;
+  border: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.readonly-table th {
+  background: #f5f7fa;
+  font-weight: 600;
+  color: #555;
+  width: 160px;
+}
+
+/* --- 条件表示 (欠品セクションなど) --- */
+.conditional-section {
+  display: none;
+  margin-top: 16px;
+  padding: 16px;
+  background: #fffde7;
+  border: 1px solid #fff9c4;
+  border-radius: 4px;
+}
+
+.conditional-section.is-visible {
+  display: block;
+}
+
+/* --- ステータスバッジ --- */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.badge--pending {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffcc80;
+}
+
+.badge--done {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.badge--shortage {
+  background: #fce4ec;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+/* --- モーダル（確認ダイアログ） --- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-overlay.is-visible {
+  display: flex;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 8px;
+  padding: 28px 32px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #1a1a1a;
+}
+
+.modal__message {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+.modal__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.modal__actions .btn {
+  min-width: 100px;
+}
+
+.btn--cancel {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.btn--cancel:hover {
+  background: #bdbdbd;
+}
+
+/* --- アラート --- */
+.alert {
+  display: none;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.alert.is-visible {
+  display: block;
+}
+
+.alert--success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.alert--info {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+}
+
+/* --- フッター --- */
+.footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.78rem;
+  color: #999;
+}
+
+/* --- レスポンシブ --- */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .form-inline {
+    flex-direction: column;
+  }
+
+  .form-inline .form-group {
+    min-width: 100%;
+  }
+
+  .form-input--short {
+    width: 100%;
+  }
+
+  .form-input--medium {
+    width: 100%;
+  }
+
+  .btn-group {
+    flex-direction: column;
+  }
+
+  .btn-group .btn {
+    width: 100%;
+  }
+}

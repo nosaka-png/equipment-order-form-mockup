@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALLDATA_備品発注フォーム（Dir側）</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header class="header">
+    <h1 class="header__title">ALLDATA_備品発注フォーム</h1>
+    <span class="header__role header__role--dir">Dir側</span>
+  </header>
+
+  <a href="view-form.html" class="nav-link">&#8594; アズロジ側「閲覧用シート＆フォーム」を確認</a>
+
+  <main class="main">
+
+    <!-- 発注者情報 -->
+    <div class="section">
+      <div class="section__header">発注者情報</div>
+      <div class="section__body">
+        <div class="form-inline">
+          <div class="form-group">
+            <label class="form-label">発注者名 <span class="required">※必須</span></label>
+            <input type="text" class="form-input" placeholder="例：山田 太郎" id="ordererName">
+          </div>
+          <div class="form-group">
+            <label class="form-label">所属部署 <span class="required">※必須</span></label>
+            <select class="form-select" id="department">
+              <option value="">-- 選択してください --</option>
+              <option value="営業部">営業部</option>
+              <option value="開発部">開発部</option>
+              <option value="総務部">総務部</option>
+              <option value="人事部">人事部</option>
+              <option value="経理部">経理部</option>
+              <option value="マーケティング部">マーケティング部</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">連絡先</label>
+            <input type="text" class="form-input" placeholder="例：内線1234 / メール" id="contact">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 耐久材一覧 -->
+    <div class="section">
+      <div class="section__header">耐久材一覧（発注品目選択）</div>
+      <div class="section__body">
+        <p style="font-size:0.85rem; color:#777; margin-bottom:12px;">
+          発注する品目にチェックを入れ、発注数量を入力してください。
+        </p>
+        <div class="table-wrap">
+          <table class="data-table" id="itemTable">
+            <thead>
+              <tr>
+                <th style="width:40px;">選択</th>
+                <th>品目名</th>
+                <th>カテゴリ</th>
+                <th style="text-align:right;">現在庫数</th>
+                <th>在庫状況</th>
+                <th style="width:100px; text-align:right;">発注数量</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox" class="item-check"></td>
+                <td>オフィスデスク（120cm）</td>
+                <td>家具</td>
+                <td style="text-align:right;">12</td>
+                <td><span class="stock-ok">十分</span></td>
+                <td><input type="number" min="0" value="0" class="item-qty"></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="item-check"></td>
+                <td>オフィスチェア（アーム付）</td>
+                <td>家具</td>
+                <td style="text-align:right;">5</td>
+                <td><span class="stock-low">残少</span></td>
+                <td><input type="number" min="0" value="0" class="item-qty"></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="item-check"></td>
+                <td>24インチモニター</td>
+                <td>PC周辺機器</td>
+                <td style="text-align:right;">8</td>
+                <td><span class="stock-ok">十分</span></td>
+                <td><input type="number" min="0" value="0" class="item-qty"></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="item-check"></td>
+                <td>ワイヤレスキーボード</td>
+                <td>PC周辺機器</td>
+                <td style="text-align:right;">2</td>
+                <td><span class="stock-low">残少</span></td>
+                <td><input type="number" min="0" value="0" class="item-qty"></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="item-check"></td>
+                <td>ワイヤレスマウス</td>
+                <td>PC周辺機器</td>
+                <td style="text-align:right;">3</td>
+                <td><span class="stock-low">残少</span></td>
+                <td><input type="number" min="0" value="0" class="item-qty"></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="item-check"></td>
+                <td>ヘッドセット（USB）</td>
+                <td>PC周辺機器</td>
+                <td style="text-align:right;">0</td>
+                <td><span class="stock-out">欠品</span></td>
+                <td><input type="number" min="0" value="0" class="item-qty"></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="item-check"></td>
+                <td>ホワイトボード（1200x900）</td>
+                <td>会議室備品</td>
+                <td style="text-align:right;">4</td>
+                <td><span class="stock-ok">十分</span></td>
+                <td><input type="number" min="0" value="0" class="item-qty"></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="item-check"></td>
+                <td>プロジェクター</td>
+                <td>会議室備品</td>
+                <td style="text-align:right;">1</td>
+                <td><span class="stock-low">残少</span></td>
+                <td><input type="number" min="0" value="0" class="item-qty"></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="item-check"></td>
+                <td>延長コード（3m / 6口）</td>
+                <td>電源・配線</td>
+                <td style="text-align:right;">10</td>
+                <td><span class="stock-ok">十分</span></td>
+                <td><input type="number" min="0" value="0" class="item-qty"></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" class="item-check"></td>
+                <td>デスクライト（LED）</td>
+                <td>照明</td>
+                <td style="text-align:right;">0</td>
+                <td><span class="stock-out">欠品</span></td>
+                <td><input type="number" min="0" value="0" class="item-qty"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 備考 -->
+    <div class="section">
+      <div class="section__header">備考・特記事項</div>
+      <div class="section__body">
+        <div class="form-group">
+          <label class="form-label">備考</label>
+          <textarea class="form-textarea" placeholder="発注に関する補足事項があれば記入してください" id="remarks"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 発注ボタン -->
+    <div class="btn-group">
+      <button type="button" class="btn btn--primary" id="btnOrder">発注決定</button>
+    </div>
+
+  </main>
+
+  <!-- 確認モーダル -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <div class="modal__title">発注内容の確認</div>
+      <div class="modal__message" id="modalMessage">
+        <!-- JSで内容を差し込み -->
+      </div>
+      <div class="modal__actions">
+        <button class="btn btn--cancel" id="btnModalCancel">キャンセル</button>
+        <button class="btn btn--success" id="btnModalConfirm">確定・Slack共有</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 完了アラート -->
+  <div class="alert alert--success" id="successAlert" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:2000; min-width:360px;">
+    閲覧用シート＆フォームを生成し、Slackでアズロジ側へ共有しました。
+  </div>
+
+  <footer class="footer">
+    備品発注フォーム モックアップ &copy; 2026
+  </footer>
+
+  <script>
+    (function () {
+      const btnOrder = document.getElementById('btnOrder');
+      const confirmModal = document.getElementById('confirmModal');
+      const modalMessage = document.getElementById('modalMessage');
+      const btnModalCancel = document.getElementById('btnModalCancel');
+      const btnModalConfirm = document.getElementById('btnModalConfirm');
+      const successAlert = document.getElementById('successAlert');
+
+      // チェックボックスと数量の連動
+      document.querySelectorAll('.item-check').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          const qtyInput = this.closest('tr').querySelector('.item-qty');
+          if (this.checked && parseInt(qtyInput.value) === 0) {
+            qtyInput.value = 1;
+          }
+        });
+      });
+
+      document.querySelectorAll('.item-qty').forEach(function (input) {
+        input.addEventListener('change', function () {
+          const cb = this.closest('tr').querySelector('.item-check');
+          cb.checked = parseInt(this.value) > 0;
+        });
+      });
+
+      // 発注決定ボタン
+      btnOrder.addEventListener('click', function () {
+        var ordererName = document.getElementById('ordererName').value.trim();
+        var department = document.getElementById('department').value;
+
+        if (!ordererName || !department) {
+          alert('発注者名と所属部署は必須項目です。');
+          return;
+        }
+
+        // 選択品目を収集
+        var selectedItems = [];
+        document.querySelectorAll('#itemTable tbody tr').forEach(function (row) {
+          var cb = row.querySelector('.item-check');
+          var qty = row.querySelector('.item-qty');
+          if (cb.checked && parseInt(qty.value) > 0) {
+            var name = row.children[1].textContent;
+            selectedItems.push(name + ' × ' + qty.value);
+          }
+        });
+
+        if (selectedItems.length === 0) {
+          alert('発注する品目を1つ以上選択してください。');
+          return;
+        }
+
+        // モーダル表示
+        modalMessage.innerHTML =
+          '<strong>発注者:</strong> ' + ordererName + '（' + department + '）<br><br>' +
+          '<strong>発注品目:</strong><br>' +
+          selectedItems.map(function (item) { return '・' + item; }).join('<br>') +
+          '<br><br>この内容で閲覧用シート＆フォームを生成し、<br>Slackでアズロジ側へ共有します。よろしいですか？';
+
+        confirmModal.classList.add('is-visible');
+      });
+
+      // モーダル：キャンセル
+      btnModalCancel.addEventListener('click', function () {
+        confirmModal.classList.remove('is-visible');
+      });
+
+      // モーダル：確定
+      btnModalConfirm.addEventListener('click', function () {
+        confirmModal.classList.remove('is-visible');
+
+        // 成功アラート表示
+        successAlert.classList.add('is-visible');
+        setTimeout(function () {
+          successAlert.classList.remove('is-visible');
+        }, 4000);
+      });
+
+      // モーダル外クリックで閉じる
+      confirmModal.addEventListener('click', function (e) {
+        if (e.target === confirmModal) {
+          confirmModal.classList.remove('is-visible');
+        }
+      });
+    })();
+  </script>
+
+</body>
+</html>

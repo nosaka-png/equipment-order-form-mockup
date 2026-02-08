@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>閲覧用シート＆フォーム（アズロジ側）</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* 閲覧用シート固有のスタイル */
+    .step-indicator {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .step-indicator__item {
+      flex: 1;
+      text-align: center;
+      padding: 10px 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #f0f0f0;
+      color: #999;
+      border-right: 2px solid #fff;
+      position: relative;
+    }
+    .step-indicator__item:last-child {
+      border-right: none;
+    }
+    .step-indicator__item.is-active {
+      background: #1976d2;
+      color: #fff;
+    }
+    .step-indicator__item.is-done {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .shortage-item-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 8px;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+    }
+    .shortage-item-row .item-name {
+      flex: 2;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .shortage-item-row .shortage-qty {
+      flex: 1;
+    }
+    .shortage-item-row .shortage-note {
+      flex: 3;
+    }
+    .shortage-item-row input,
+    .shortage-item-row textarea {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+    .shortage-item-row textarea {
+      min-height: 36px;
+      resize: vertical;
+    }
+
+    .response-section {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      background: #f3e5f5;
+      border: 1px solid #ce93d8;
+      border-radius: 4px;
+    }
+    .response-section.is-visible {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header class="header">
+    <h1 class="header__title">閲覧用シート＆フォーム</h1>
+    <span class="header__role header__role--azlogi">アズロジ側</span>
+  </header>
+
+  <a href="index.html" class="nav-link">&#8592; Dir側「ALLDATA_備品発注フォーム」へ戻る</a>
+
+  <main class="main">
+
+    <!-- ステップインジケーター -->
+    <div class="step-indicator" id="stepIndicator">
+      <div class="step-indicator__item is-active" data-step="1">1. 発注内容確認</div>
+      <div class="step-indicator__item" data-step="2">2. 欠品チェック</div>
+      <div class="step-indicator__item" data-step="3">3. 対応記入</div>
+      <div class="step-indicator__item" data-step="4">4. 発送報告</div>
+      <div class="step-indicator__item" data-step="5">5. 完了</div>
+    </div>
+
+    <!-- セクション1: 発注内容の閲覧（読み取り専用） -->
+    <div class="section">
+      <div class="section__header">発注内容（Dir側からの依頼） <span class="badge badge--pending">確認待ち</span></div>
+      <div class="section__body">
+        <table class="readonly-table">
+          <tr>
+            <th>発注元</th>
+            <td>山田 太郎（営業部）</td>
+          </tr>
+          <tr>
+            <th>連絡先</th>
+            <td>内線1234 / yamada@example.co.jp</td>
+          </tr>
+          <tr>
+            <th>発注日</th>
+            <td>2026年2月8日</td>
+          </tr>
+          <tr>
+            <th>備考</th>
+            <td>3F 新規増員対応分です。急ぎでお願いいたします。</td>
+          </tr>
+        </table>
+
+        <h4 style="margin:16px 0 8px; font-size:0.9rem; color:#555;">発注品目一覧</h4>
+        <div class="table-wrap">
+          <table class="data-table" id="orderItemsTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>品目名</th>
+                <th>カテゴリ</th>
+                <th style="text-align:right;">発注数量</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>オフィスチェア（アーム付）</td>
+                <td>家具</td>
+                <td style="text-align:right;">5</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>ワイヤレスキーボード</td>
+                <td>PC周辺機器</td>
+                <td style="text-align:right;">10</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>ワイヤレスマウス</td>
+                <td>PC周辺機器</td>
+                <td style="text-align:right;">10</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>ヘッドセット（USB）</td>
+                <td>PC周辺機器</td>
+                <td style="text-align:right;">5</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>デスクライト（LED）</td>
+                <td>照明</td>
+                <td style="text-align:right;">5</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- セクション2: 欠品確認 -->
+    <div class="section">
+      <div class="section__header">欠品確認</div>
+      <div class="section__body">
+        <div class="form-group">
+          <label class="form-label">上記の発注品目に欠品はありますか？ <span class="required">※必須</span></label>
+          <div class="radio-group">
+            <label>
+              <input type="radio" name="shortage" value="no" id="shortageNo"> なし（全品対応可能）
+            </label>
+            <label>
+              <input type="radio" name="shortage" value="yes" id="shortageYes"> あり（一部欠品あり）
+            </label>
+          </div>
+        </div>
+
+        <!-- 欠品ありの場合のみ表示 -->
+        <div class="conditional-section" id="shortageSection">
+          <h4 style="margin-bottom:12px; font-size:0.9rem; color:#c62828;">欠品内容を入力してください</h4>
+          <div style="margin-bottom:8px; display:flex; gap:12px; font-size:0.78rem; color:#777; padding:0 8px;">
+            <span style="flex:2;">品目名</span>
+            <span style="flex:1;">欠品数</span>
+            <span style="flex:3;">備考</span>
+          </div>
+          <div id="shortageItems">
+            <div class="shortage-item-row">
+              <span class="item-name">オフィスチェア（アーム付）</span>
+              <div class="shortage-qty"><input type="number" min="0" value="0" placeholder="欠品数"></div>
+              <div class="shortage-note"><input type="text" placeholder="備考（入荷予定等）"></div>
+            </div>
+            <div class="shortage-item-row">
+              <span class="item-name">ワイヤレスキーボード</span>
+              <div class="shortage-qty"><input type="number" min="0" value="0" placeholder="欠品数"></div>
+              <div class="shortage-note"><input type="text" placeholder="備考（入荷予定等）"></div>
+            </div>
+            <div class="shortage-item-row">
+              <span class="item-name">ワイヤレスマウス</span>
+              <div class="shortage-qty"><input type="number" min="0" value="0" placeholder="欠品数"></div>
+              <div class="shortage-note"><input type="text" placeholder="備考（入荷予定等）"></div>
+            </div>
+            <div class="shortage-item-row">
+              <span class="item-name">ヘッドセット（USB）</span>
+              <div class="shortage-qty"><input type="number" min="0" value="0" placeholder="欠品数"></div>
+              <div class="shortage-note"><input type="text" placeholder="備考（入荷予定等）"></div>
+            </div>
+            <div class="shortage-item-row">
+              <span class="item-name">デスクライト（LED）</span>
+              <div class="shortage-qty"><input type="number" min="0" value="0" placeholder="欠品数"></div>
+              <div class="shortage-note"><input type="text" placeholder="備考（入荷予定等）"></div>
+            </div>
+          </div>
+
+          <div class="btn-group" style="margin-top:16px;">
+            <button type="button" class="btn btn--warning" id="btnReportShortage">欠品内容を報告（Slack通知）</button>
+          </div>
+        </div>
+
+        <!-- 欠品報告後のアラート -->
+        <div class="alert alert--info" id="shortageAlert">
+          欠品内容をSlackで通知しました。このフォームのURLがDir側へ共有されます。
+        </div>
+      </div>
+    </div>
+
+    <!-- セクション3: 対応記入（欠品ありの場合のみ） -->
+    <div class="section" id="responseSection" style="display:none;">
+      <div class="section__header">不足備品の対応内容</div>
+      <div class="section__body">
+        <div class="form-group">
+          <label class="form-label">対応方針 <span class="required">※必須</span></label>
+          <select class="form-select" id="responsePolicy">
+            <option value="">-- 選択してください --</option>
+            <option value="代替品手配">代替品を手配</option>
+            <option value="入荷待ち">入荷待ち（後日発送）</option>
+            <option value="一部発送">在庫分のみ先行発送</option>
+            <option value="キャンセル">該当品目はキャンセル</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">対応内容の詳細</label>
+          <textarea class="form-textarea" placeholder="具体的な対応内容・スケジュール等を記入してください" id="responseDetail"></textarea>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn--primary" id="btnSaveResponse">対応内容を保存</button>
+        </div>
+
+        <div class="alert alert--success" id="responseAlert">
+          対応内容を保存しました。
+        </div>
+      </div>
+    </div>
+
+    <!-- セクション4: 発送報告 -->
+    <div class="section">
+      <div class="section__header">発送報告</div>
+      <div class="section__body">
+        <div class="form-inline">
+          <div class="form-group">
+            <label class="form-label">配送業者 <span class="required">※必須</span></label>
+            <select class="form-select" id="carrier">
+              <option value="">-- 選択してください --</option>
+              <option value="ヤマト運輸">ヤマト運輸</option>
+              <option value="佐川急便">佐川急便</option>
+              <option value="日本郵便">日本郵便</option>
+              <option value="西濃運輸">西濃運輸</option>
+              <option value="自社便">自社便</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">伝票番号 <span class="required">※必須</span></label>
+            <input type="text" class="form-input" placeholder="例：1234-5678-9012" id="trackingNumber">
+          </div>
+          <div class="form-group">
+            <label class="form-label">発送日 <span class="required">※必須</span></label>
+            <input type="date" class="form-input" id="shipDate">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">発送に関する備考</label>
+          <textarea class="form-textarea" placeholder="梱包数、到着予定日など" id="shipRemarks" style="min-height:60px;"></textarea>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn--success" id="btnShip">発送完了を報告</button>
+        </div>
+
+        <div class="alert alert--success" id="shipAlert">
+          発送完了を報告しました。Dir側へ自動通知されます。
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 完了モーダル -->
+  <div class="modal-overlay" id="completeModal">
+    <div class="modal">
+      <div class="modal__title">発送完了</div>
+      <div class="modal__message">
+        発送報告が完了しました。<br>
+        Dir側へSlackで自動通知されます。<br><br>
+        <strong>配送業者:</strong> <span id="completedCarrier"></span><br>
+        <strong>伝票番号:</strong> <span id="completedTracking"></span><br>
+        <strong>発送日:</strong> <span id="completedDate"></span>
+      </div>
+      <div class="modal__actions">
+        <button class="btn btn--primary" id="btnCompleteOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    備品発注フォーム モックアップ &copy; 2026
+  </footer>
+
+  <script>
+    (function () {
+      // --- 要素取得 ---
+      var shortageYes = document.getElementById('shortageYes');
+      var shortageNo = document.getElementById('shortageNo');
+      var shortageSection = document.getElementById('shortageSection');
+      var responseSection = document.getElementById('responseSection');
+      var btnReportShortage = document.getElementById('btnReportShortage');
+      var shortageAlert = document.getElementById('shortageAlert');
+      var btnSaveResponse = document.getElementById('btnSaveResponse');
+      var responseAlert = document.getElementById('responseAlert');
+      var btnShip = document.getElementById('btnShip');
+      var shipAlert = document.getElementById('shipAlert');
+      var completeModal = document.getElementById('completeModal');
+      var btnCompleteOk = document.getElementById('btnCompleteOk');
+      var stepItems = document.querySelectorAll('.step-indicator__item');
+
+      // --- ステップ更新 ---
+      function setStep(activeStep) {
+        stepItems.forEach(function (el) {
+          var step = parseInt(el.getAttribute('data-step'));
+          el.classList.remove('is-active', 'is-done');
+          if (step < activeStep) {
+            el.classList.add('is-done');
+          } else if (step === activeStep) {
+            el.classList.add('is-active');
+          }
+        });
+      }
+
+      // --- 欠品あり/なし切替 ---
+      shortageYes.addEventListener('change', function () {
+        shortageSection.classList.add('is-visible');
+        responseSection.style.display = 'none';
+        shortageAlert.classList.remove('is-visible');
+        responseAlert.classList.remove('is-visible');
+        setStep(2);
+      });
+
+      shortageNo.addEventListener('change', function () {
+        shortageSection.classList.remove('is-visible');
+        responseSection.style.display = 'none';
+        shortageAlert.classList.remove('is-visible');
+        responseAlert.classList.remove('is-visible');
+        setStep(4);
+      });
+
+      // --- 欠品報告ボタン ---
+      btnReportShortage.addEventListener('click', function () {
+        shortageAlert.classList.add('is-visible');
+        responseSection.style.display = 'block';
+        setStep(3);
+      });
+
+      // --- 対応内容保存 ---
+      btnSaveResponse.addEventListener('click', function () {
+        var policy = document.getElementById('responsePolicy').value;
+        if (!policy) {
+          alert('対応方針を選択してください。');
+          return;
+        }
+        responseAlert.classList.add('is-visible');
+        setStep(4);
+      });
+
+      // --- 発送完了報告 ---
+      btnShip.addEventListener('click', function () {
+        var carrier = document.getElementById('carrier').value;
+        var tracking = document.getElementById('trackingNumber').value.trim();
+        var shipDate = document.getElementById('shipDate').value;
+
+        if (!carrier || !tracking || !shipDate) {
+          alert('配送業者、伝票番号、発送日は必須です。');
+          return;
+        }
+
+        // 完了モーダル表示
+        document.getElementById('completedCarrier').textContent = carrier;
+        document.getElementById('completedTracking').textContent = tracking;
+        document.getElementById('completedDate').textContent = shipDate;
+        completeModal.classList.add('is-visible');
+
+        shipAlert.classList.add('is-visible');
+        setStep(5);
+      });
+
+      // --- 完了モーダルを閉じる ---
+      btnCompleteOk.addEventListener('click', function () {
+        completeModal.classList.remove('is-visible');
+      });
+
+      completeModal.addEventListener('click', function (e) {
+        if (e.target === completeModal) {
+          completeModal.classList.remove('is-visible');
+        }
+      });
+
+      // --- 初期値：発送日を今日にする ---
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, '0');
+      var dd = String(today.getDate()).padStart(2, '0');
+      document.getElementById('shipDate').value = yyyy + '-' + mm + '-' + dd;
+
+    })();
+  </script>
+
+</body>
+</html>
