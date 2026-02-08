@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ALLDATA_備品発注フォーム（Dir側）</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .option-checks { display:flex; gap:20px; flex-wrap:wrap; padding:4px 0; }
+    .option-checks label { display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.9rem; }
+    .option-checks input[type="checkbox"] { width:16px; height:16px; }
+    .calc-inputs { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; margin-bottom:16px; }
+    .calc-inputs .form-group { min-width:160px; }
+    .auto-badge { display:inline-block; padding:1px 8px; border-radius:3px; font-size:0.72rem; font-weight:600; background:#e3f2fd; color:#1565c0; margin-left:6px; vertical-align:middle; }
+    .option-badge { display:inline-block; padding:1px 8px; border-radius:3px; font-size:0.72rem; font-weight:600; background:#fff3e0; color:#e65100; margin-left:6px; vertical-align:middle; }
+    #equipmentSection { display:none; }
+    #equipmentSection.is-visible { display:block; }
+  </style>
 </head>
 <body>
 
@@ -14,7 +25,10 @@
     <span class="header__role header__role--dir">Dir側</span>
   </header>
 
-  <a href="view-form.html" class="nav-link">&#8594; アズロジ側「閲覧用シート＆フォーム」を確認</a>
+  <div style="padding:0 24px; display:flex; gap:20px;">
+    <a href="view-form.html" class="nav-link" style="margin:16px 0 0;">&#8594; アズロジ側「閲覧用シート＆フォーム」</a>
+    <a href="mentor-check.html" class="nav-link" style="margin:16px 0 0;">&#8594; メンター用「備品チェック画面」</a>
+  </div>
 
   <main class="main">
 
@@ -39,117 +53,104 @@
               <option value="マーケティング部">マーケティング部</option>
             </select>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 研修情報 -->
+    <div class="section">
+      <div class="section__header">研修情報</div>
+      <div class="section__body">
+        <div class="form-group">
+          <label class="form-label">研修ID <span class="required">※必須</span></label>
+          <select class="form-select" id="trainingId">
+            <option value="">-- 研修を選択してください --</option>
+          </select>
+        </div>
+        <div class="form-inline" style="margin-top:12px;">
           <div class="form-group">
-            <label class="form-label">連絡先</label>
-            <input type="text" class="form-input" placeholder="例：内線1234 / メール" id="contact">
+            <label class="form-label">宛先 <span class="required">※必須</span></label>
+            <input type="text" class="form-input" placeholder="例：東京都千代田区丸の内1-1-1 〇〇ビル 3F" id="destination">
+          </div>
+          <div class="form-group">
+            <label class="form-label">到着希望日時 <span class="required">※必須</span></label>
+            <input type="datetime-local" class="form-input" id="arrivalDate">
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 耐久材一覧 -->
-    <div class="section">
-      <div class="section__header">耐久材一覧（発注品目選択）</div>
+    <!-- 耐久財一覧（研修種別選択後に表示） -->
+    <div class="section" id="equipmentSection">
+      <div class="section__header">耐久財一覧 <span id="selectedTrainingLabel" style="font-weight:400; font-size:0.85rem; color:#1976d2;"></span></div>
       <div class="section__body">
+
+        <!-- 人数・チーム数入力 -->
+        <div class="calc-inputs">
+          <div class="form-group">
+            <label class="form-label">研修人数 <span class="required">※必須</span></label>
+            <input type="number" class="form-input form-input--short" min="1" value="" placeholder="人数" id="numPeople">
+          </div>
+          <div class="form-group">
+            <label class="form-label">チーム数 <span class="required">※必須</span></label>
+            <input type="number" class="form-input form-input--short" min="1" value="" placeholder="チーム数" id="numTeams">
+          </div>
+          <div class="form-group">
+            <button type="button" class="btn btn--primary" id="btnCalc" style="margin-bottom:0;">数量を算出</button>
+          </div>
+        </div>
+
+        <!-- オプション -->
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label">オプション選択</label>
+          <div class="option-checks">
+            <label><input type="checkbox" value="プロジェクタ" class="option-check"> プロジェクタ</label>
+            <label><input type="checkbox" value="音響" class="option-check"> 音響</label>
+            <label><input type="checkbox" value="3口アース" class="option-check"> 3口アース</label>
+            <label><input type="checkbox" value="PCレンタル" class="option-check"> PCレンタル</label>
+          </div>
+        </div>
+
         <p style="font-size:0.85rem; color:#777; margin-bottom:12px;">
-          発注する品目にチェックを入れ、発注数量を入力してください。
+          研修種別に基づく必要備品が自動表示されます。数量は人数・チーム数から自動算出されます。
         </p>
         <div class="table-wrap">
           <table class="data-table" id="itemTable">
             <thead>
               <tr>
-                <th style="width:40px;">選択</th>
                 <th>品目名</th>
                 <th>カテゴリ</th>
+                <th>研修種別</th>
+                <th>区分</th>
                 <th style="text-align:right;">現在庫数</th>
                 <th>在庫状況</th>
-                <th style="width:100px; text-align:right;">発注数量</th>
+                <th style="width:100px; text-align:right;">必要数量</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td><input type="checkbox" class="item-check"></td>
-                <td>オフィスデスク（120cm）</td>
-                <td>家具</td>
-                <td style="text-align:right;">12</td>
-                <td><span class="stock-ok">十分</span></td>
-                <td><input type="number" min="0" value="0" class="item-qty"></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="item-check"></td>
-                <td>オフィスチェア（アーム付）</td>
-                <td>家具</td>
-                <td style="text-align:right;">5</td>
-                <td><span class="stock-low">残少</span></td>
-                <td><input type="number" min="0" value="0" class="item-qty"></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="item-check"></td>
-                <td>24インチモニター</td>
-                <td>PC周辺機器</td>
-                <td style="text-align:right;">8</td>
-                <td><span class="stock-ok">十分</span></td>
-                <td><input type="number" min="0" value="0" class="item-qty"></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="item-check"></td>
-                <td>ワイヤレスキーボード</td>
-                <td>PC周辺機器</td>
-                <td style="text-align:right;">2</td>
-                <td><span class="stock-low">残少</span></td>
-                <td><input type="number" min="0" value="0" class="item-qty"></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="item-check"></td>
-                <td>ワイヤレスマウス</td>
-                <td>PC周辺機器</td>
-                <td style="text-align:right;">3</td>
-                <td><span class="stock-low">残少</span></td>
-                <td><input type="number" min="0" value="0" class="item-qty"></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="item-check"></td>
-                <td>ヘッドセット（USB）</td>
-                <td>PC周辺機器</td>
-                <td style="text-align:right;">0</td>
-                <td><span class="stock-out">欠品</span></td>
-                <td><input type="number" min="0" value="0" class="item-qty"></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="item-check"></td>
-                <td>ホワイトボード（1200x900）</td>
-                <td>会議室備品</td>
-                <td style="text-align:right;">4</td>
-                <td><span class="stock-ok">十分</span></td>
-                <td><input type="number" min="0" value="0" class="item-qty"></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="item-check"></td>
-                <td>プロジェクター</td>
-                <td>会議室備品</td>
-                <td style="text-align:right;">1</td>
-                <td><span class="stock-low">残少</span></td>
-                <td><input type="number" min="0" value="0" class="item-qty"></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="item-check"></td>
-                <td>延長コード（3m / 6口）</td>
-                <td>電源・配線</td>
-                <td style="text-align:right;">10</td>
-                <td><span class="stock-ok">十分</span></td>
-                <td><input type="number" min="0" value="0" class="item-qty"></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="item-check"></td>
-                <td>デスクライト（LED）</td>
-                <td>照明</td>
-                <td style="text-align:right;">0</td>
-                <td><span class="stock-out">欠品</span></td>
-                <td><input type="number" min="0" value="0" class="item-qty"></td>
-              </tr>
+            <tbody id="itemTableBody">
+              <!-- JSで動的生成 -->
             </tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- メンター指定 -->
+    <div class="section">
+      <div class="section__header">メンター指定（備品チェック権限）</div>
+      <div class="section__body">
+        <p style="font-size:0.85rem; color:#777; margin-bottom:12px;">
+          現場で備品の受取・返送チェックを行うメンター（アルバイトスタッフ）を指定してください。<br>
+          指定されたメンターのみが備品チェック画面を閲覧できます。
+        </p>
+        <div id="mentorList">
+          <div class="mentor-row" style="display:flex; gap:12px; align-items:center; margin-bottom:8px;">
+            <input type="text" class="form-input" placeholder="名前（例：佐藤 花子）" style="flex:1;">
+            <input type="email" class="form-input" placeholder="メール（例：sato@example.com）" style="flex:1.5;">
+            <button type="button" class="btn-remove-mentor" title="削除" style="background:none; border:1px solid #e0e0e0; border-radius:4px; padding:6px 10px; cursor:pointer; color:#999; font-size:0.9rem;">&times;</button>
+          </div>
+        </div>
+        <button type="button" class="btn" id="btnAddMentor" style="background:#f5f5f5; color:#555; border:1px solid #ccc; font-size:0.85rem; padding:6px 16px; margin-top:4px;">+ メンターを追加</button>
       </div>
     </div>
 
@@ -175,9 +176,7 @@
   <div class="modal-overlay" id="confirmModal">
     <div class="modal">
       <div class="modal__title">発注内容の確認</div>
-      <div class="modal__message" id="modalMessage">
-        <!-- JSで内容を差し込み -->
-      </div>
+      <div class="modal__message" id="modalMessage"></div>
       <div class="modal__actions">
         <button class="btn btn--cancel" id="btnModalCancel">キャンセル</button>
         <button class="btn btn--success" id="btnModalConfirm">確定・Slack共有</button>
@@ -195,90 +194,367 @@
   </footer>
 
   <script>
-    (function () {
-      const btnOrder = document.getElementById('btnOrder');
-      const confirmModal = document.getElementById('confirmModal');
-      const modalMessage = document.getElementById('modalMessage');
-      const btnModalCancel = document.getElementById('btnModalCancel');
-      const btnModalConfirm = document.getElementById('btnModalConfirm');
-      const successAlert = document.getElementById('successAlert');
+  (function () {
+    // ==============================
+    // 研修DB（ダミー）
+    // ==============================
+    var trainingDB = [
+      { id: '00001', name: '00001_トヨタDX2Days 2/12-13',        type: 'DX' },
+      { id: '00002', name: '00002_ソニーDXアドバンス1Day 2/20',   type: 'DX' },
+      { id: '00003', name: '00003_日立AI入門2Days 3/5-6',         type: 'AI' },
+      { id: '00004', name: '00004_富士通AI実践3Days 3/10-12',     type: 'AI' },
+      { id: '00005', name: '00005_パナソニックCD研修1Day 3/15',   type: 'CD' },
+      { id: '00006', name: '00006_NEC模造紙WS1Day 3/18',          type: '模造紙' },
+      { id: '00007', name: '00007_キヤノン模造紙WS2Days 3/22-23', type: '模造紙' },
+      { id: '00008', name: '00008_KDDI_AIA実践2Days 3/25-26',     type: 'AIA' },
+      { id: '00009', name: '00009_楽天BI分析1Day 4/2',            type: 'BI' },
+      { id: '00010', name: '00010_三菱UFJBI応用2Days 4/8-9',      type: 'BI' }
+    ];
 
-      // チェックボックスと数量の連動
-      document.querySelectorAll('.item-check').forEach(function (cb) {
-        cb.addEventListener('change', function () {
-          const qtyInput = this.closest('tr').querySelector('.item-qty');
-          if (this.checked && parseInt(qtyInput.value) === 0) {
-            qtyInput.value = 1;
+    // ==============================
+    // 研修種別ごとの必要備品
+    //   perPerson: 人数あたり, perTeam: チーム数あたり, fixed: 固定数
+    // ==============================
+    var equipmentByType = {
+      'DX': [
+        { name: 'ノートPC',               category: 'PC機器',     perPerson:1, perTeam:0, fixed:0, stock:25 },
+        { name: 'マウス',                  category: 'PC周辺機器', perPerson:1, perTeam:0, fixed:0, stock:30 },
+        { name: 'HDMIケーブル',            category: 'ケーブル',   perPerson:0, perTeam:1, fixed:0, stock:15 },
+        { name: 'モニター（24インチ）',    category: 'PC周辺機器', perPerson:0, perTeam:1, fixed:0, stock:8  },
+        { name: 'ホワイトボードマーカーセット', category: '文具', perPerson:0, perTeam:1, fixed:0, stock:20 },
+        { name: '付箋（大）',              category: '文具',       perPerson:1, perTeam:0, fixed:0, stock:50 },
+        { name: '電源タップ（6口）',       category: '電源',       perPerson:0, perTeam:1, fixed:0, stock:12 }
+      ],
+      'AI': [
+        { name: 'ノートPC（GPU搭載）',    category: 'PC機器',     perPerson:1, perTeam:0, fixed:0, stock:10 },
+        { name: 'マウス',                  category: 'PC周辺機器', perPerson:1, perTeam:0, fixed:0, stock:30 },
+        { name: 'LANケーブル（3m）',       category: 'ケーブル',   perPerson:1, perTeam:0, fixed:0, stock:20 },
+        { name: 'HDMIケーブル',            category: 'ケーブル',   perPerson:0, perTeam:1, fixed:0, stock:15 },
+        { name: 'ホワイトボードマーカーセット', category: '文具', perPerson:0, perTeam:1, fixed:0, stock:20 },
+        { name: '電源タップ（6口）',       category: '電源',       perPerson:0, perTeam:1, fixed:0, stock:12 }
+      ],
+      'CD': [
+        { name: 'ノートPC',               category: 'PC機器',     perPerson:1, perTeam:0, fixed:0, stock:25 },
+        { name: 'マウス',                  category: 'PC周辺機器', perPerson:1, perTeam:0, fixed:0, stock:30 },
+        { name: 'USBメモリ（32GB）',       category: 'メディア',   perPerson:1, perTeam:0, fixed:0, stock:40 },
+        { name: 'HDMIケーブル',            category: 'ケーブル',   perPerson:0, perTeam:1, fixed:0, stock:15 },
+        { name: '電源タップ（6口）',       category: '電源',       perPerson:0, perTeam:1, fixed:0, stock:12 }
+      ],
+      '模造紙': [
+        { name: '模造紙（白）',            category: '紙類',       perPerson:0, perTeam:3, fixed:0, stock:100 },
+        { name: 'マーカー（太字8色セット）', category: '文具',     perPerson:0, perTeam:1, fixed:0, stock:15 },
+        { name: '付箋（大）',              category: '文具',       perPerson:1, perTeam:0, fixed:0, stock:50 },
+        { name: '付箋（小）',              category: '文具',       perPerson:1, perTeam:0, fixed:0, stock:50 },
+        { name: 'マスキングテープ',        category: '文具',       perPerson:0, perTeam:1, fixed:0, stock:20 },
+        { name: 'ドットシール',            category: '文具',       perPerson:1, perTeam:0, fixed:0, stock:60 }
+      ],
+      'AIA': [
+        { name: 'ノートPC（GPU搭載）',    category: 'PC機器',     perPerson:1, perTeam:0, fixed:0, stock:10 },
+        { name: 'マウス',                  category: 'PC周辺機器', perPerson:1, perTeam:0, fixed:0, stock:30 },
+        { name: 'USBハブ（4ポート）',      category: 'PC周辺機器', perPerson:0, perTeam:1, fixed:0, stock:8  },
+        { name: 'HDMIケーブル',            category: 'ケーブル',   perPerson:0, perTeam:1, fixed:0, stock:15 },
+        { name: 'LANケーブル（3m）',       category: 'ケーブル',   perPerson:1, perTeam:0, fixed:0, stock:20 },
+        { name: '電源タップ（6口）',       category: '電源',       perPerson:0, perTeam:1, fixed:0, stock:12 }
+      ],
+      'BI': [
+        { name: 'ノートPC',               category: 'PC機器',     perPerson:1, perTeam:0, fixed:0, stock:25 },
+        { name: 'マウス',                  category: 'PC周辺機器', perPerson:1, perTeam:0, fixed:0, stock:30 },
+        { name: 'HDMIケーブル',            category: 'ケーブル',   perPerson:0, perTeam:1, fixed:0, stock:15 },
+        { name: 'モニター（24インチ）',    category: 'PC周辺機器', perPerson:0, perTeam:1, fixed:0, stock:8  },
+        { name: '電源タップ（6口）',       category: '電源',       perPerson:0, perTeam:1, fixed:0, stock:12 }
+      ]
+    };
+
+    // ==============================
+    // オプション備品
+    // ==============================
+    var optionEquipment = {
+      'プロジェクタ': [
+        { name: 'プロジェクター',          category: '映像機器', fixed:1, stock:3 },
+        { name: 'プロジェクタースクリーン', category: '映像機器', fixed:1, stock:3 },
+        { name: 'HDMIケーブル（5m）',      category: 'ケーブル', fixed:1, stock:5 }
+      ],
+      '音響': [
+        { name: 'ワイヤレススピーカー',    category: '音響機器', fixed:1, stock:4 },
+        { name: 'ワイヤレスマイク',        category: '音響機器', fixed:2, stock:6 }
+      ],
+      '3口アース': [
+        { name: '3口アース付き延長コード（5m）', category: '電源', fixed:2, stock:8 }
+      ],
+      'PCレンタル': [
+        { name: 'レンタルPC（Windows）',   category: 'PC機器', perPerson:1, stock:20 }
+      ]
+    };
+
+    // ==============================
+    // DOM要素
+    // ==============================
+    var trainingSelect = document.getElementById('trainingId');
+    var equipmentSection = document.getElementById('equipmentSection');
+    var selectedTrainingLabel = document.getElementById('selectedTrainingLabel');
+    var numPeople = document.getElementById('numPeople');
+    var numTeams = document.getElementById('numTeams');
+    var btnCalc = document.getElementById('btnCalc');
+    var itemTableBody = document.getElementById('itemTableBody');
+    var btnOrder = document.getElementById('btnOrder');
+    var confirmModal = document.getElementById('confirmModal');
+    var modalMessage = document.getElementById('modalMessage');
+    var btnModalCancel = document.getElementById('btnModalCancel');
+    var btnModalConfirm = document.getElementById('btnModalConfirm');
+    var successAlert = document.getElementById('successAlert');
+
+    // 現在選択中のトレーニング
+    var currentTraining = null;
+
+    // ==============================
+    // 研修DBをプルダウンに投入
+    // ==============================
+    trainingDB.forEach(function (t) {
+      var opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.name + '  [' + t.type + ']';
+      opt.dataset.type = t.type;
+      trainingSelect.appendChild(opt);
+    });
+
+    // ==============================
+    // 研修選択時 → 耐久財セクション表示
+    // ==============================
+    trainingSelect.addEventListener('change', function () {
+      var selectedOpt = trainingSelect.options[trainingSelect.selectedIndex];
+      if (!selectedOpt.value) {
+        equipmentSection.classList.remove('is-visible');
+        currentTraining = null;
+        return;
+      }
+      currentTraining = trainingDB.find(function (t) { return t.id === selectedOpt.value; });
+      selectedTrainingLabel.textContent = '— ' + currentTraining.name + '（種別: ' + currentTraining.type + '）';
+      equipmentSection.classList.add('is-visible');
+      numPeople.value = '';
+      numTeams.value = '';
+      renderTable();
+    });
+
+    // ==============================
+    // オプション変更時 → テーブル再描画
+    // ==============================
+    document.querySelectorAll('.option-check').forEach(function (cb) {
+      cb.addEventListener('change', function () {
+        renderTable();
+      });
+    });
+
+    // ==============================
+    // 数量算出ボタン
+    // ==============================
+    btnCalc.addEventListener('click', function () {
+      var people = parseInt(numPeople.value) || 0;
+      var teams = parseInt(numTeams.value) || 0;
+      if (people < 1 || teams < 1) {
+        alert('研修人数とチーム数を1以上で入力してください。');
+        return;
+      }
+      renderTable();
+    });
+
+    // ==============================
+    // テーブル描画
+    // ==============================
+    function renderTable() {
+      if (!currentTraining) return;
+      var people = parseInt(numPeople.value) || 0;
+      var teams = parseInt(numTeams.value) || 0;
+      var type = currentTraining.type;
+      var items = equipmentByType[type] || [];
+
+      // 選択中オプション
+      var selectedOptions = [];
+      document.querySelectorAll('.option-check:checked').forEach(function (cb) {
+        selectedOptions.push(cb.value);
+      });
+
+      var html = '';
+
+      // 研修種別の基本備品
+      items.forEach(function (item) {
+        var qty = 0;
+        if (people > 0 && teams > 0) {
+          qty = (item.perPerson || 0) * people + (item.perTeam || 0) * teams + (item.fixed || 0);
+        }
+        var stockClass = item.stock <= 0 ? 'stock-out' : (item.stock < qty ? 'stock-low' : 'stock-ok');
+        var stockLabel = item.stock <= 0 ? '欠品' : (item.stock < qty ? '残少' : '十分');
+        html += '<tr>';
+        html += '<td>' + item.name + '</td>';
+        html += '<td>' + item.category + '</td>';
+        html += '<td>' + type + '</td>';
+        html += '<td>基本<span class="auto-badge">自動</span></td>';
+        html += '<td style="text-align:right;">' + item.stock + '</td>';
+        html += '<td><span class="' + stockClass + '">' + stockLabel + '</span></td>';
+        html += '<td style="text-align:right; font-weight:600;">' + (qty > 0 ? qty : '-') + '</td>';
+        html += '</tr>';
+      });
+
+      // オプション備品
+      selectedOptions.forEach(function (optName) {
+        var optItems = optionEquipment[optName] || [];
+        optItems.forEach(function (item) {
+          var qty = 0;
+          if (people > 0 && teams > 0) {
+            if (item.perPerson) {
+              qty = item.perPerson * people;
+            } else {
+              qty = item.fixed || 0;
+            }
           }
+          var stockClass = item.stock <= 0 ? 'stock-out' : (item.stock < qty ? 'stock-low' : 'stock-ok');
+          var stockLabel = item.stock <= 0 ? '欠品' : (item.stock < qty ? '残少' : '十分');
+          html += '<tr style="background:#fffde7;">';
+          html += '<td>' + item.name + '</td>';
+          html += '<td>' + item.category + '</td>';
+          html += '<td>' + type + '</td>';
+          html += '<td><span class="option-badge">' + optName + '</span></td>';
+          html += '<td style="text-align:right;">' + item.stock + '</td>';
+          html += '<td><span class="' + stockClass + '">' + stockLabel + '</span></td>';
+          html += '<td style="text-align:right; font-weight:600;">' + (qty > 0 ? qty : '-') + '</td>';
+          html += '</tr>';
         });
       });
 
-      document.querySelectorAll('.item-qty').forEach(function (input) {
-        input.addEventListener('change', function () {
-          const cb = this.closest('tr').querySelector('.item-check');
-          cb.checked = parseInt(this.value) > 0;
-        });
-      });
+      if (html === '') {
+        html = '<tr><td colspan="7" style="text-align:center; color:#999; padding:24px;">研修を選択してください</td></tr>';
+      }
 
-      // 発注決定ボタン
-      btnOrder.addEventListener('click', function () {
-        var ordererName = document.getElementById('ordererName').value.trim();
-        var department = document.getElementById('department').value;
+      itemTableBody.innerHTML = html;
+    }
 
-        if (!ordererName || !department) {
-          alert('発注者名と所属部署は必須項目です。');
-          return;
+    // ==============================
+    // メンター追加・削除
+    // ==============================
+    var btnAddMentor = document.getElementById('btnAddMentor');
+    var mentorList = document.getElementById('mentorList');
+
+    btnAddMentor.addEventListener('click', function () {
+      var row = document.createElement('div');
+      row.className = 'mentor-row';
+      row.style.cssText = 'display:flex; gap:12px; align-items:center; margin-bottom:8px;';
+      row.innerHTML =
+        '<input type="text" class="form-input" placeholder="名前（例：佐藤 花子）" style="flex:1;">' +
+        '<input type="email" class="form-input" placeholder="メール（例：sato@example.com）" style="flex:1.5;">' +
+        '<button type="button" class="btn-remove-mentor" title="削除" style="background:none; border:1px solid #e0e0e0; border-radius:4px; padding:6px 10px; cursor:pointer; color:#999; font-size:0.9rem;">&times;</button>';
+      mentorList.appendChild(row);
+    });
+
+    mentorList.addEventListener('click', function (e) {
+      if (e.target.classList.contains('btn-remove-mentor')) {
+        var rows = mentorList.querySelectorAll('.mentor-row');
+        if (rows.length > 1) {
+          e.target.closest('.mentor-row').remove();
+        } else {
+          alert('メンターは最低1名必要です。');
         }
+      }
+    });
 
-        // 選択品目を収集
-        var selectedItems = [];
-        document.querySelectorAll('#itemTable tbody tr').forEach(function (row) {
-          var cb = row.querySelector('.item-check');
-          var qty = row.querySelector('.item-qty');
-          if (cb.checked && parseInt(qty.value) > 0) {
-            var name = row.children[1].textContent;
-            selectedItems.push(name + ' × ' + qty.value);
+    // ==============================
+    // 発注決定
+    // ==============================
+    btnOrder.addEventListener('click', function () {
+      var ordererName = document.getElementById('ordererName').value.trim();
+      var department = document.getElementById('department').value;
+      var destination = document.getElementById('destination').value.trim();
+      var arrivalDate = document.getElementById('arrivalDate').value;
+
+      if (!ordererName || !department) {
+        alert('発注者名と所属部署は必須項目です。');
+        return;
+      }
+      if (!currentTraining) {
+        alert('研修IDを選択してください。');
+        return;
+      }
+      if (!destination || !arrivalDate) {
+        alert('宛先と到着希望日時は必須項目です。');
+        return;
+      }
+
+      var people = parseInt(numPeople.value) || 0;
+      var teams = parseInt(numTeams.value) || 0;
+      if (people < 1 || teams < 1) {
+        alert('研修人数とチーム数を入力し、数量を算出してください。');
+        return;
+      }
+
+      // 品目収集
+      var rows = itemTableBody.querySelectorAll('tr');
+      var selectedItems = [];
+      rows.forEach(function (row) {
+        var cells = row.querySelectorAll('td');
+        if (cells.length >= 7) {
+          var name = cells[0].textContent;
+          var qty = cells[6].textContent.trim();
+          if (qty !== '-' && qty !== '0') {
+            selectedItems.push(name + ' × ' + qty);
           }
-        });
-
-        if (selectedItems.length === 0) {
-          alert('発注する品目を1つ以上選択してください。');
-          return;
-        }
-
-        // モーダル表示
-        modalMessage.innerHTML =
-          '<strong>発注者:</strong> ' + ordererName + '（' + department + '）<br><br>' +
-          '<strong>発注品目:</strong><br>' +
-          selectedItems.map(function (item) { return '・' + item; }).join('<br>') +
-          '<br><br>この内容で閲覧用シート＆フォームを生成し、<br>Slackでアズロジ側へ共有します。よろしいですか？';
-
-        confirmModal.classList.add('is-visible');
-      });
-
-      // モーダル：キャンセル
-      btnModalCancel.addEventListener('click', function () {
-        confirmModal.classList.remove('is-visible');
-      });
-
-      // モーダル：確定
-      btnModalConfirm.addEventListener('click', function () {
-        confirmModal.classList.remove('is-visible');
-
-        // 成功アラート表示
-        successAlert.classList.add('is-visible');
-        setTimeout(function () {
-          successAlert.classList.remove('is-visible');
-        }, 4000);
-      });
-
-      // モーダル外クリックで閉じる
-      confirmModal.addEventListener('click', function (e) {
-        if (e.target === confirmModal) {
-          confirmModal.classList.remove('is-visible');
         }
       });
-    })();
+
+      if (selectedItems.length === 0) {
+        alert('発注する品目がありません。');
+        return;
+      }
+
+      var arrivalStr = arrivalDate.replace('T', ' ');
+
+      // メンター情報を収集
+      var mentors = [];
+      mentorList.querySelectorAll('.mentor-row').forEach(function (row) {
+        var inputs = row.querySelectorAll('input');
+        var mName = inputs[0].value.trim();
+        var mEmail = inputs[1].value.trim();
+        if (mName && mEmail) {
+          mentors.push(mName + '（' + mEmail + '）');
+        }
+      });
+
+      modalMessage.innerHTML =
+        '<strong>発注者:</strong> ' + ordererName + '（' + department + '）<br>' +
+        '<strong>研修:</strong> ' + currentTraining.name + '<br>' +
+        '<strong>宛先:</strong> ' + destination + '<br>' +
+        '<strong>到着希望:</strong> ' + arrivalStr + '<br>' +
+        '<strong>人数:</strong> ' + people + '名 / <strong>チーム数:</strong> ' + teams + '<br><br>' +
+        '<strong>発注品目:</strong><br>' +
+        selectedItems.map(function (item) { return '・' + item; }).join('<br>') +
+        '<br><br>' +
+        (mentors.length > 0
+          ? '<strong>チェック権限付与メンター:</strong><br>' + mentors.map(function (m) { return '・' + m; }).join('<br>') + '<br><br>'
+          : '') +
+        'この内容で閲覧用シート＆フォームを生成し、<br>Slackでアズロジ側へ共有します。よろしいですか？';
+
+      confirmModal.classList.add('is-visible');
+    });
+
+    // モーダル：キャンセル
+    btnModalCancel.addEventListener('click', function () {
+      confirmModal.classList.remove('is-visible');
+    });
+
+    // モーダル：確定
+    btnModalConfirm.addEventListener('click', function () {
+      confirmModal.classList.remove('is-visible');
+      successAlert.classList.add('is-visible');
+      setTimeout(function () {
+        successAlert.classList.remove('is-visible');
+      }, 4000);
+    });
+
+    // モーダル外クリックで閉じる
+    confirmModal.addEventListener('click', function (e) {
+      if (e.target === confirmModal) {
+        confirmModal.classList.remove('is-visible');
+      }
+    });
+
+  })();
   </script>
 
 </body>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>備品チェック画面（メンター用）</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .login-box {
+      max-width: 400px;
+      margin: 60px auto;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 32px;
+    }
+    .login-box h2 {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .header__role--mentor {
+      background: #fce4ec;
+      color: #c62828;
+      border: 1px solid #ef9a9a;
+    }
+
+    .check-table th, .check-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e8e8e8;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .check-table th {
+      background: #f5f7fa;
+      font-weight: 600;
+      color: #555;
+      font-size: 0.85rem;
+      position: sticky;
+      top: 0;
+    }
+    .check-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .check-table tbody tr:hover {
+      background: #f0f6ff;
+    }
+    .check-table input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    .check-table .consumable-label {
+      font-size: 0.75rem;
+      color: #999;
+      display: block;
+    }
+    .check-table .comment-input {
+      width: 100%;
+      padding: 4px 8px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      font-family: inherit;
+      background: #fafafa;
+      min-width: 140px;
+    }
+    .check-table .comment-input:focus {
+      outline: none;
+      border-color: #1976d2;
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.12);
+    }
+    .check-table .comment-input::placeholder { color: #bbb; }
+    .no-measure-label {
+      font-size: 0.72rem;
+      color: #e65100;
+      background: #fff3e0;
+      padding: 1px 6px;
+      border-radius: 3px;
+      display: inline-block;
+      margin-left: 4px;
+    }
+
+    .progress-bar-wrap {
+      background: #e0e0e0;
+      border-radius: 10px;
+      height: 20px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-bar {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .progress-bar--receive { background: #1976d2; }
+    .progress-bar--return { background: #2e7d32; }
+
+    .tab-bar {
+      display: flex;
+      border-bottom: 2px solid #e0e0e0;
+      margin-bottom: 20px;
+    }
+    .tab-bar__item {
+      padding: 10px 24px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #999;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .tab-bar__item:hover { color: #555; }
+    .tab-bar__item.is-active {
+      color: #1976d2;
+      border-bottom-color: #1976d2;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.is-active { display: block; }
+
+    .summary-cards {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .summary-card {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 16px;
+      text-align: center;
+    }
+    .summary-card__value {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    .summary-card__label {
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ログイン画面 -->
+  <div id="loginScreen">
+    <header class="header">
+      <h1 class="header__title">備品チェック画面</h1>
+      <span class="header__role header__role--mentor">メンター用</span>
+    </header>
+    <div class="login-box">
+      <h2>メンターログイン</h2>
+      <p style="font-size:0.85rem; color:#777; margin-bottom:16px;">
+        Dir側から招待されたメールアドレスでログインしてください。
+      </p>
+      <div class="form-group">
+        <label class="form-label">メールアドレス</label>
+        <input type="email" class="form-input" placeholder="例：sato@example.com" id="loginEmail">
+      </div>
+      <div class="btn-group" style="margin-top:16px;">
+        <button type="button" class="btn btn--primary" id="btnLogin" style="width:100%;">ログイン</button>
+      </div>
+      <p style="font-size:0.78rem; color:#aaa; margin-top:12px; text-align:center;">
+        （モック）任意のメールアドレスでログインできます
+      </p>
+    </div>
+  </div>
+
+  <!-- メイン画面 -->
+  <div id="mainScreen" style="display:none;">
+    <header class="header">
+      <h1 class="header__title">備品チェック画面</h1>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span id="mentorName" style="font-size:0.85rem; color:#555;"></span>
+        <span class="header__role header__role--mentor">メンター</span>
+      </div>
+    </header>
+
+    <div style="padding:0 24px; display:flex; gap:20px;">
+      <a href="index.html" class="nav-link" style="margin:16px 0 0;">&#8592; Dir側「ALLDATA_備品発注フォーム」</a>
+    </div>
+
+    <main class="main">
+
+      <!-- 研修情報（読み取り専用） -->
+      <div class="section">
+        <div class="section__header">研修情報</div>
+        <div class="section__body">
+          <table class="readonly-table">
+            <tr>
+              <th>研修ID</th>
+              <td>00001_トヨタDX2Days 2/12-13 [DX]</td>
+            </tr>
+            <tr>
+              <th>会場</th>
+              <td>愛知県豊田市トヨタ町1番地 研修棟 2F</td>
+            </tr>
+            <tr>
+              <th>研修日程</th>
+              <td>2026年2月12日 〜 2月13日</td>
+            </tr>
+            <tr>
+              <th>人数 / チーム数</th>
+              <td>20名 / 5チーム</td>
+            </tr>
+            <tr>
+              <th>発注者</th>
+              <td>山田 太郎（営業部）</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- サマリーカード -->
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="summary-card__value" id="totalItems">0</div>
+          <div class="summary-card__label">備品総数</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card__value" style="color:#1976d2;" id="receiveCount">0</div>
+          <div class="summary-card__label">受取チェック済み</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card__value" style="color:#2e7d32;" id="returnCount">0</div>
+          <div class="summary-card__label">返送チェック済み（計測対象）</div>
+        </div>
+      </div>
+
+      <!-- タブ切替 -->
+      <div class="section">
+        <div class="tab-bar">
+          <div class="tab-bar__item is-active" data-tab="receive">受取チェック（到着確認）</div>
+          <div class="tab-bar__item" data-tab="return">返送チェック（撤収確認）</div>
+        </div>
+
+        <!-- 受取チェック -->
+        <div class="tab-panel is-active" id="tab-receive">
+          <div class="section__body">
+            <p style="font-size:0.85rem; color:#777; margin-bottom:8px;">
+              備品が届いたら1つずつチェックを入れてください。
+            </p>
+            <div style="margin-bottom:12px;">
+              <span style="font-size:0.85rem; color:#555;">進捗:</span>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar progress-bar--receive" id="receiveProgress" style="width:0%;">0%</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="check-table" id="receiveTable">
+                <thead>
+                  <tr>
+                    <th style="width:50px;">確認</th>
+                    <th>品目名</th>
+                    <th>カテゴリ</th>
+                    <th>種別</th>
+                    <th style="text-align:right;">数量</th>
+                    <th>備考</th>
+                  </tr>
+                </thead>
+                <tbody id="receiveBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 返送チェック -->
+        <div class="tab-panel" id="tab-return">
+          <div class="section__body">
+            <p style="font-size:0.85rem; color:#777; margin-bottom:8px;">
+              研修終了後、返送する備品にチェックを入れてください。<span style="color:#e65100;">消耗品は計測不要です。</span>
+            </p>
+            <div style="margin-bottom:12px;">
+              <span style="font-size:0.85rem; color:#555;">進捗:</span>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar progress-bar--return" id="returnProgress" style="width:0%;">0%</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="check-table" id="returnTable">
+                <thead>
+                  <tr>
+                    <th style="width:50px;">確認</th>
+                    <th>品目名</th>
+                    <th>カテゴリ</th>
+                    <th>種別</th>
+                    <th style="text-align:right;">数量</th>
+                    <th>備考</th>
+                  </tr>
+                </thead>
+                <tbody id="returnBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 報告ボタン -->
+      <div class="btn-group">
+        <button type="button" class="btn btn--primary" id="btnReportReceive">受取完了を報告</button>
+        <button type="button" class="btn btn--success" id="btnReportReturn">返送完了を報告</button>
+      </div>
+
+    </main>
+
+    <!-- 報告完了モーダル -->
+    <div class="modal-overlay" id="reportModal">
+      <div class="modal">
+        <div class="modal__title" id="reportModalTitle"></div>
+        <div class="modal__message" id="reportModalMessage"></div>
+        <div class="modal__actions">
+          <button class="btn btn--primary" id="btnReportOk">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      備品発注フォーム モックアップ &copy; 2026
+    </footer>
+  </div>
+
+  <script>
+  (function () {
+
+    // ==============================
+    // 備品データ（DX研修のダミー）
+    // ==============================
+    var equipmentItems = [
+      { name: 'ノートPC',               category: 'PC機器',     type: '基本（DX）',  qty: 20, consumable: false },
+      { name: 'マウス',                  category: 'PC周辺機器', type: '基本（DX）',  qty: 20, consumable: false },
+      { name: 'HDMIケーブル',            category: 'ケーブル',   type: '基本（DX）',  qty: 5,  consumable: false },
+      { name: 'モニター（24インチ）',    category: 'PC周辺機器', type: '基本（DX）',  qty: 5,  consumable: false },
+      { name: 'ホワイトボードマーカーセット', category: '文具', type: '基本（DX）',  qty: 5,  consumable: true  },
+      { name: '付箋（大）',              category: '文具',       type: '基本（DX）',  qty: 20, consumable: true  },
+      { name: '電源タップ（6口）',       category: '電源',       type: '基本（DX）',  qty: 5,  consumable: false },
+      { name: 'プロジェクター',          category: '映像機器',   type: 'OP:プロジェクタ', qty: 1, consumable: false },
+      { name: 'プロジェクタースクリーン', category: '映像機器',  type: 'OP:プロジェクタ', qty: 1, consumable: false },
+      { name: 'HDMIケーブル（5m）',      category: 'ケーブル',   type: 'OP:プロジェクタ', qty: 1, consumable: false }
+    ];
+
+    // 計測対象品（消耗品以外）
+    var measurableItems = equipmentItems.filter(function (item) { return !item.consumable; });
+
+    // ==============================
+    // ログイン
+    // ==============================
+    var loginScreen = document.getElementById('loginScreen');
+    var mainScreen = document.getElementById('mainScreen');
+    var btnLogin = document.getElementById('btnLogin');
+    var loginEmail = document.getElementById('loginEmail');
+
+    btnLogin.addEventListener('click', function () {
+      var email = loginEmail.value.trim();
+      if (!email) {
+        alert('メールアドレスを入力してください。');
+        return;
+      }
+      // モック: 名前を適当に生成
+      var nameMap = {
+        'sato@example.com': '佐藤 花子',
+        'tanaka@example.com': '田中 一郎',
+        'suzuki@example.com': '鈴木 美咲'
+      };
+      var displayName = nameMap[email] || email.split('@')[0];
+      document.getElementById('mentorName').textContent = displayName + ' さん';
+
+      loginScreen.style.display = 'none';
+      mainScreen.style.display = 'block';
+      renderTables();
+      updateSummary();
+    });
+
+    // Enterキーでログイン
+    loginEmail.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') btnLogin.click();
+    });
+
+    // ==============================
+    // テーブル描画
+    // ==============================
+    function renderTables() {
+      var receiveBody = document.getElementById('receiveBody');
+      var returnBody = document.getElementById('returnBody');
+
+      // 受取チェック（全品目・備考入力可）
+      var rHtml = '';
+      equipmentItems.forEach(function (item, i) {
+        rHtml += '<tr>';
+        rHtml += '<td><input type="checkbox" class="receive-check" data-index="' + i + '"></td>';
+        rHtml += '<td>' + item.name + (item.consumable ? '<span class="consumable-label">消耗品</span>' : '') + '</td>';
+        rHtml += '<td>' + item.category + '</td>';
+        rHtml += '<td>' + item.type + '</td>';
+        rHtml += '<td style="text-align:right;">' + item.qty + '</td>';
+        rHtml += '<td><input type="text" class="comment-input receive-comment" placeholder="欠品・不具合等あればコメント" data-index="' + i + '"></td>';
+        rHtml += '</tr>';
+      });
+      receiveBody.innerHTML = rHtml;
+
+      // 返送チェック（全品目表示。消耗品は計測不要マーク付き・備考入力可）
+      var tHtml = '';
+      equipmentItems.forEach(function (item, i) {
+        var noMeasure = item.consumable;
+        tHtml += '<tr' + (noMeasure ? ' style="opacity:0.7;"' : '') + '>';
+        if (noMeasure) {
+          tHtml += '<td><input type="checkbox" class="return-check" data-index="' + i + '" checked disabled><span class="no-measure-label">計測不要</span></td>';
+        } else {
+          tHtml += '<td><input type="checkbox" class="return-check" data-index="' + i + '"></td>';
+        }
+        tHtml += '<td>' + item.name + (noMeasure ? '<span class="consumable-label">消耗品</span>' : '') + '</td>';
+        tHtml += '<td>' + item.category + '</td>';
+        tHtml += '<td>' + item.type + '</td>';
+        tHtml += '<td style="text-align:right;">' + item.qty + '</td>';
+        tHtml += '<td><input type="text" class="comment-input return-comment" placeholder="不具合・破損等あればコメント" data-index="' + i + '"' + (noMeasure ? ' placeholder="計測不要"' : '') + '></td>';
+        tHtml += '</tr>';
+      });
+      returnBody.innerHTML = tHtml;
+
+      document.getElementById('totalItems').textContent = equipmentItems.length;
+    }
+
+    // ==============================
+    // サマリー & 進捗更新
+    // ==============================
+    function updateSummary() {
+      var receiveChecked = document.querySelectorAll('.receive-check:checked').length;
+      // 返送は計測対象（消耗品以外）のチェックのみカウント
+      var returnChecked = document.querySelectorAll('.return-check:checked:not(:disabled)').length;
+      var totalReceive = equipmentItems.length;
+      var totalReturn = measurableItems.length;
+
+      document.getElementById('receiveCount').textContent = receiveChecked + ' / ' + totalReceive;
+      document.getElementById('returnCount').textContent = returnChecked + ' / ' + totalReturn;
+
+      var rPct = totalReceive > 0 ? Math.round(receiveChecked / totalReceive * 100) : 0;
+      var tPct = totalReturn > 0 ? Math.round(returnChecked / totalReturn * 100) : 0;
+
+      var rBar = document.getElementById('receiveProgress');
+      rBar.style.width = rPct + '%';
+      rBar.textContent = rPct + '%';
+
+      var tBar = document.getElementById('returnProgress');
+      tBar.style.width = tPct + '%';
+      tBar.textContent = tPct + '%';
+    }
+
+    // チェック変更時にサマリー更新
+    document.addEventListener('change', function (e) {
+      if (e.target.classList.contains('receive-check') || e.target.classList.contains('return-check')) {
+        updateSummary();
+      }
+    });
+
+    // ==============================
+    // タブ切替
+    // ==============================
+    document.querySelectorAll('.tab-bar__item').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('.tab-bar__item').forEach(function (t) { t.classList.remove('is-active'); });
+        document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('is-active'); });
+        tab.classList.add('is-active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('is-active');
+      });
+    });
+
+    // ==============================
+    // 報告ボタン
+    // ==============================
+    var reportModal = document.getElementById('reportModal');
+    var reportModalTitle = document.getElementById('reportModalTitle');
+    var reportModalMessage = document.getElementById('reportModalMessage');
+    var btnReportOk = document.getElementById('btnReportOk');
+
+    // コメント付き品目を収集するヘルパー
+    function collectComments(selector) {
+      var comments = [];
+      document.querySelectorAll(selector).forEach(function (input) {
+        var val = input.value.trim();
+        if (val) {
+          var idx = parseInt(input.dataset.index);
+          var item = equipmentItems[idx];
+          comments.push('<strong>' + item.name + ':</strong> ' + val);
+        }
+      });
+      return comments;
+    }
+
+    document.getElementById('btnReportReceive').addEventListener('click', function () {
+      var checked = document.querySelectorAll('.receive-check:checked').length;
+      var total = equipmentItems.length;
+      var unchecked = total - checked;
+      var comments = collectComments('.receive-comment');
+
+      var msg = '';
+      if (unchecked > 0) {
+        reportModalTitle.textContent = '受取チェック未完了';
+        msg = '未確認の備品が <strong>' + unchecked + '件</strong> あります。<br>' +
+          '全品確認してから報告するか、現状のまま報告しますか？<br><br>' +
+          '<strong>チェック済み:</strong> ' + checked + ' / ' + total + ' 品目';
+      } else {
+        reportModalTitle.textContent = '受取完了';
+        msg = '全 <strong>' + total + ' 品目</strong> の受取を確認しました。<br>' +
+          'Dir側へ受取完了を通知します。';
+      }
+      if (comments.length > 0) {
+        msg += '<br><br><strong style="color:#c62828;">申し送り事項:</strong><br>' + comments.join('<br>');
+      }
+      reportModalMessage.innerHTML = msg;
+      reportModal.classList.add('is-visible');
+    });
+
+    document.getElementById('btnReportReturn').addEventListener('click', function () {
+      var checked = document.querySelectorAll('.return-check:checked:not(:disabled)').length;
+      var total = measurableItems.length;
+      var unchecked = total - checked;
+      var comments = collectComments('.return-comment');
+
+      var msg = '';
+      if (unchecked > 0) {
+        reportModalTitle.textContent = '返送チェック未完了';
+        msg = '未確認の備品が <strong>' + unchecked + '件</strong> あります（計測対象のみ）。<br>' +
+          '全品確認してから報告するか、現状のまま報告しますか？<br><br>' +
+          '<strong>チェック済み:</strong> ' + checked + ' / ' + total + ' 品目（計測対象）';
+      } else {
+        reportModalTitle.textContent = '返送完了';
+        msg = '計測対象 <strong>' + total + ' 品目</strong> の返送を確認しました。<br>' +
+          'Dir側へ返送完了を通知します。';
+      }
+      if (comments.length > 0) {
+        msg += '<br><br><strong style="color:#c62828;">申し送り事項:</strong><br>' + comments.join('<br>');
+      }
+      reportModalMessage.innerHTML = msg;
+      reportModal.classList.add('is-visible');
+    });
+
+    btnReportOk.addEventListener('click', function () {
+      reportModal.classList.remove('is-visible');
+    });
+    reportModal.addEventListener('click', function (e) {
+      if (e.target === reportModal) reportModal.classList.remove('is-visible');
+    });
+
+  })();
+  </script>
+
+</body>
+</html>

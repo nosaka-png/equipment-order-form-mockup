@@ -92,7 +92,10 @@
     <span class="header__role header__role--azlogi">アズロジ側</span>
   </header>
 
-  <a href="index.html" class="nav-link">&#8592; Dir側「ALLDATA_備品発注フォーム」へ戻る</a>
+  <div style="padding:0 24px; display:flex; gap:20px;">
+    <a href="index.html" class="nav-link" style="margin:16px 0 0;">&#8592; Dir側「ALLDATA_備品発注フォーム」</a>
+    <a href="mentor-check.html" class="nav-link" style="margin:16px 0 0;">&#8594; メンター用「備品チェック画面」</a>
+  </div>
 
   <main class="main">
 
@@ -100,9 +103,10 @@
     <div class="step-indicator" id="stepIndicator">
       <div class="step-indicator__item is-active" data-step="1">1. 発注内容確認</div>
       <div class="step-indicator__item" data-step="2">2. 欠品チェック</div>
-      <div class="step-indicator__item" data-step="3">3. 対応記入</div>
-      <div class="step-indicator__item" data-step="4">4. 発送報告</div>
-      <div class="step-indicator__item" data-step="5">5. 完了</div>
+      <div class="step-indicator__item" data-step="3">3. Dir対応待ち</div>
+      <div class="step-indicator__item" data-step="4">4. 対応内容確認</div>
+      <div class="step-indicator__item" data-step="5">5. 発送報告</div>
+      <div class="step-indicator__item" data-step="6">6. 完了</div>
     </div>
 
     <!-- セクション1: 発注内容の閲覧（読み取り専用） -->
@@ -115,16 +119,28 @@
             <td>山田 太郎（営業部）</td>
           </tr>
           <tr>
-            <th>連絡先</th>
-            <td>内線1234 / yamada@example.co.jp</td>
+            <th>研修ID</th>
+            <td>00001_トヨタDX2Days 2/12-13 [DX]</td>
+          </tr>
+          <tr>
+            <th>宛先</th>
+            <td>愛知県豊田市トヨタ町1番地 研修棟 2F</td>
+          </tr>
+          <tr>
+            <th>到着希望日時</th>
+            <td>2026年2月11日 10:00</td>
           </tr>
           <tr>
             <th>発注日</th>
             <td>2026年2月8日</td>
           </tr>
           <tr>
+            <th>人数 / チーム数</th>
+            <td>20名 / 5チーム</td>
+          </tr>
+          <tr>
             <th>備考</th>
-            <td>3F 新規増員対応分です。急ぎでお願いいたします。</td>
+            <td>前日搬入希望。駐車場は研修棟裏手をご利用ください。</td>
           </tr>
         </table>
 
@@ -142,32 +158,44 @@
             <tbody>
               <tr>
                 <td>1</td>
-                <td>オフィスチェア（アーム付）</td>
-                <td>家具</td>
-                <td style="text-align:right;">5</td>
+                <td>ノートPC</td>
+                <td>PC機器</td>
+                <td style="text-align:right;">20</td>
               </tr>
               <tr>
                 <td>2</td>
-                <td>ワイヤレスキーボード</td>
+                <td>マウス</td>
                 <td>PC周辺機器</td>
-                <td style="text-align:right;">10</td>
+                <td style="text-align:right;">20</td>
               </tr>
               <tr>
                 <td>3</td>
-                <td>ワイヤレスマウス</td>
-                <td>PC周辺機器</td>
-                <td style="text-align:right;">10</td>
+                <td>HDMIケーブル</td>
+                <td>ケーブル</td>
+                <td style="text-align:right;">5</td>
               </tr>
               <tr>
                 <td>4</td>
-                <td>ヘッドセット（USB）</td>
+                <td>モニター（24インチ）</td>
                 <td>PC周辺機器</td>
                 <td style="text-align:right;">5</td>
               </tr>
               <tr>
                 <td>5</td>
-                <td>デスクライト（LED）</td>
-                <td>照明</td>
+                <td>ホワイトボードマーカーセット</td>
+                <td>文具</td>
+                <td style="text-align:right;">5</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>付箋（大）</td>
+                <td>文具</td>
+                <td style="text-align:right;">20</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td>電源タップ（6口）</td>
+                <td>電源</td>
                 <td style="text-align:right;">5</td>
               </tr>
             </tbody>
@@ -202,27 +230,37 @@
           </div>
           <div id="shortageItems">
             <div class="shortage-item-row">
-              <span class="item-name">オフィスチェア（アーム付）</span>
+              <span class="item-name">ノートPC</span>
               <div class="shortage-qty"><input type="number" min="0" value="0" placeholder="欠品数"></div>
               <div class="shortage-note"><input type="text" placeholder="備考（入荷予定等）"></div>
             </div>
             <div class="shortage-item-row">
-              <span class="item-name">ワイヤレスキーボード</span>
+              <span class="item-name">マウス</span>
               <div class="shortage-qty"><input type="number" min="0" value="0" placeholder="欠品数"></div>
               <div class="shortage-note"><input type="text" placeholder="備考（入荷予定等）"></div>
             </div>
             <div class="shortage-item-row">
-              <span class="item-name">ワイヤレスマウス</span>
+              <span class="item-name">HDMIケーブル</span>
               <div class="shortage-qty"><input type="number" min="0" value="0" placeholder="欠品数"></div>
               <div class="shortage-note"><input type="text" placeholder="備考（入荷予定等）"></div>
             </div>
             <div class="shortage-item-row">
-              <span class="item-name">ヘッドセット（USB）</span>
+              <span class="item-name">モニター（24インチ）</span>
               <div class="shortage-qty"><input type="number" min="0" value="0" placeholder="欠品数"></div>
               <div class="shortage-note"><input type="text" placeholder="備考（入荷予定等）"></div>
             </div>
             <div class="shortage-item-row">
-              <span class="item-name">デスクライト（LED）</span>
+              <span class="item-name">ホワイトボードマーカーセット</span>
+              <div class="shortage-qty"><input type="number" min="0" value="0" placeholder="欠品数"></div>
+              <div class="shortage-note"><input type="text" placeholder="備考（入荷予定等）"></div>
+            </div>
+            <div class="shortage-item-row">
+              <span class="item-name">付箋（大）</span>
+              <div class="shortage-qty"><input type="number" min="0" value="0" placeholder="欠品数"></div>
+              <div class="shortage-note"><input type="text" placeholder="備考（入荷予定等）"></div>
+            </div>
+            <div class="shortage-item-row">
+              <span class="item-name">電源タップ（6口）</span>
               <div class="shortage-qty"><input type="number" min="0" value="0" placeholder="欠品数"></div>
               <div class="shortage-note"><input type="text" placeholder="備考（入荷予定等）"></div>
             </div>
@@ -240,31 +278,51 @@
       </div>
     </div>
 
-    <!-- セクション3: 対応記入（欠品ありの場合のみ） -->
-    <div class="section" id="responseSection" style="display:none;">
-      <div class="section__header">不足備品の対応内容</div>
+    <!-- セクション3: Dir対応待ち -->
+    <div class="section" id="waitingSection" style="display:none;">
+      <div class="section__header">Dir側の対応待ち <span class="badge badge--pending">対応待ち</span></div>
       <div class="section__body">
-        <div class="form-group">
-          <label class="form-label">対応方針 <span class="required">※必須</span></label>
-          <select class="form-select" id="responsePolicy">
-            <option value="">-- 選択してください --</option>
-            <option value="代替品手配">代替品を手配</option>
-            <option value="入荷待ち">入荷待ち（後日発送）</option>
-            <option value="一部発送">在庫分のみ先行発送</option>
-            <option value="キャンセル">該当品目はキャンセル</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">対応内容の詳細</label>
-          <textarea class="form-textarea" placeholder="具体的な対応内容・スケジュール等を記入してください" id="responseDetail"></textarea>
-        </div>
+        <p style="font-size:0.9rem; color:#777; line-height:1.8;">
+          欠品内容がDir側へ通知されました。<br>
+          Dir側が各欠品品目に対して対応方針を記入するまでお待ちください。<br>
+          対応内容が記入されると、Slackで通知されます。
+        </p>
         <div class="btn-group">
-          <button type="button" class="btn btn--primary" id="btnSaveResponse">対応内容を保存</button>
+          <button type="button" class="btn btn--primary" id="btnSimulateDir" style="opacity:0.85;">（モック）Dir側の対応入力をシミュレート</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- セクション4: Dir側の対応内容確認（アズロジ読み取り専用） -->
+    <div class="section" id="responseSection" style="display:none;">
+      <div class="section__header">不足備品の対応内容（Dir側が記入済み） <span class="badge badge--done">Dir記入済み</span></div>
+      <div class="section__body">
+        <p style="font-size:0.85rem; color:#555; margin-bottom:12px;">
+          Dir側が各欠品品目に対して以下の対応を記入しました。内容を確認のうえ、発送準備を進めてください。
+        </p>
+
+        <div class="table-wrap">
+          <table class="data-table" id="dirResponseTable">
+            <thead>
+              <tr>
+                <th>品目名</th>
+                <th style="text-align:right;">欠品数</th>
+                <th>Dir対応方針</th>
+                <th>Dir対応詳細</th>
+              </tr>
+            </thead>
+            <tbody id="dirResponseBody">
+              <!-- JSで動的に生成 -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="btn-group" style="margin-top:16px;">
+          <button type="button" class="btn btn--success" id="btnConfirmResponse">対応内容を確認しました — 発送準備に進む</button>
         </div>
 
         <div class="alert alert--success" id="responseAlert">
-          対応内容を保存しました。
+          対応内容を確認しました。発送報告に進んでください。
         </div>
       </div>
     </div>
@@ -275,25 +333,15 @@
       <div class="section__body">
         <div class="form-inline">
           <div class="form-group">
-            <label class="form-label">配送業者 <span class="required">※必須</span></label>
-            <select class="form-select" id="carrier">
-              <option value="">-- 選択してください --</option>
-              <option value="ヤマト運輸">ヤマト運輸</option>
-              <option value="佐川急便">佐川急便</option>
-              <option value="日本郵便">日本郵便</option>
-              <option value="西濃運輸">西濃運輸</option>
-              <option value="自社便">自社便</option>
-              <option value="その他">その他</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">伝票番号 <span class="required">※必須</span></label>
-            <input type="text" class="form-input" placeholder="例：1234-5678-9012" id="trackingNumber">
-          </div>
-          <div class="form-group">
             <label class="form-label">発送日 <span class="required">※必須</span></label>
             <input type="date" class="form-input" id="shipDate">
           </div>
+        </div>
+        <div class="form-group" style="margin-top:12px;">
+          <label class="form-label">伝票PDF添付 <span class="required">※必須</span></label>
+          <p style="font-size:0.8rem; color:#777; margin-bottom:6px;">ヤマト運輸の伝票PDFをアップロードしてください（複数可）</p>
+          <input type="file" id="slipFiles" multiple accept=".pdf,.jpg,.jpeg,.png" style="font-size:0.9rem;">
+          <div id="fileList" style="margin-top:8px;"></div>
         </div>
         <div class="form-group">
           <label class="form-label">発送に関する備考</label>
@@ -318,9 +366,9 @@
       <div class="modal__message">
         発送報告が完了しました。<br>
         Dir側へSlackで自動通知されます。<br><br>
-        <strong>配送業者:</strong> <span id="completedCarrier"></span><br>
-        <strong>伝票番号:</strong> <span id="completedTracking"></span><br>
-        <strong>発送日:</strong> <span id="completedDate"></span>
+        <strong>配送業者:</strong> ヤマト運輸（固定）<br>
+        <strong>発送日:</strong> <span id="completedDate"></span><br>
+        <strong>添付ファイル:</strong> <span id="completedFiles"></span>
       </div>
       <div class="modal__actions">
         <button class="btn btn--primary" id="btnCompleteOk">OK</button>
@@ -338,18 +386,32 @@
       var shortageYes = document.getElementById('shortageYes');
       var shortageNo = document.getElementById('shortageNo');
       var shortageSection = document.getElementById('shortageSection');
+      var waitingSection = document.getElementById('waitingSection');
       var responseSection = document.getElementById('responseSection');
       var btnReportShortage = document.getElementById('btnReportShortage');
       var shortageAlert = document.getElementById('shortageAlert');
-      var btnSaveResponse = document.getElementById('btnSaveResponse');
+      var btnSimulateDir = document.getElementById('btnSimulateDir');
+      var btnConfirmResponse = document.getElementById('btnConfirmResponse');
       var responseAlert = document.getElementById('responseAlert');
       var btnShip = document.getElementById('btnShip');
       var shipAlert = document.getElementById('shipAlert');
       var completeModal = document.getElementById('completeModal');
       var btnCompleteOk = document.getElementById('btnCompleteOk');
       var stepItems = document.querySelectorAll('.step-indicator__item');
+      var dirResponseBody = document.getElementById('dirResponseBody');
 
-      // --- ステップ更新 ---
+      // --- Dir側のダミー対応データ ---
+      var dirResponseData = {
+        'ノートPC':                 { policy: '代替品手配',   detail: 'Lenovo ThinkPad E14を代替として手配済み。2/10入荷予定。' },
+        'マウス':                   { policy: '在庫分のみ先行発送', detail: '在庫15個を先行発送。残5個は2/12入荷後に追送。' },
+        'HDMIケーブル':             { policy: '対応不要',     detail: '在庫十分のため欠品なしとして処理。' },
+        'モニター（24インチ）':     { policy: '入荷待ち',     detail: 'Dell P2422H 5台を発注済み。2/10着予定。研修には間に合う見込み。' },
+        'ホワイトボードマーカーセット': { policy: '対応不要', detail: '在庫確認済み。問題なし。' },
+        '付箋（大）':               { policy: '代替品手配',   detail: '3M製からコクヨ製に変更して手配。同等品質。' },
+        '電源タップ（6口）':        { policy: '対応不要',     detail: '在庫確認済み。問題なし。' }
+      };
+
+      // --- ステップ更新（6ステップ対応） ---
       function setStep(activeStep) {
         stepItems.forEach(function (el) {
           var step = parseInt(el.getAttribute('data-step'));
@@ -365,6 +427,7 @@
       // --- 欠品あり/なし切替 ---
       shortageYes.addEventListener('change', function () {
         shortageSection.classList.add('is-visible');
+        waitingSection.style.display = 'none';
         responseSection.style.display = 'none';
         shortageAlert.classList.remove('is-visible');
         responseAlert.classList.remove('is-visible');
@@ -373,49 +436,109 @@
 
       shortageNo.addEventListener('change', function () {
         shortageSection.classList.remove('is-visible');
+        waitingSection.style.display = 'none';
         responseSection.style.display = 'none';
         shortageAlert.classList.remove('is-visible');
         responseAlert.classList.remove('is-visible');
-        setStep(4);
+        setStep(5);
       });
 
-      // --- 欠品報告ボタン ---
+      // --- 欠品報告ボタン → Dir側へ通知 & 対応待ちセクション表示 ---
       btnReportShortage.addEventListener('click', function () {
         shortageAlert.classList.add('is-visible');
-        responseSection.style.display = 'block';
+        waitingSection.style.display = 'block';
+        responseSection.style.display = 'none';
         setStep(3);
       });
 
-      // --- 対応内容保存 ---
-      btnSaveResponse.addEventListener('click', function () {
-        var policy = document.getElementById('responsePolicy').value;
-        if (!policy) {
-          alert('対応方針を選択してください。');
-          return;
+      // --- （モック）Dir側の対応入力をシミュレート ---
+      btnSimulateDir.addEventListener('click', function () {
+        // 欠品として入力された品目のデータを収集
+        var shortageRows = document.querySelectorAll('#shortageItems .shortage-item-row');
+        var html = '';
+        shortageRows.forEach(function (row) {
+          var name = row.querySelector('.item-name').textContent;
+          var qty = parseInt(row.querySelector('.shortage-qty input').value) || 0;
+          if (qty > 0) {
+            var resp = dirResponseData[name] || { policy: '検討中', detail: '対応を検討中です。' };
+            html += '<tr>';
+            html += '<td style="font-weight:600;">' + name + '</td>';
+            html += '<td style="text-align:right;">' + qty + '</td>';
+            html += '<td><span class="badge badge--done">' + resp.policy + '</span></td>';
+            html += '<td style="font-size:0.85rem;">' + resp.detail + '</td>';
+            html += '</tr>';
+          }
+        });
+
+        if (html === '') {
+          // 欠品数が入力されていなかった場合、全品目をダミー表示
+          shortageRows.forEach(function (row) {
+            var name = row.querySelector('.item-name').textContent;
+            var resp = dirResponseData[name] || { policy: '検討中', detail: '対応を検討中です。' };
+            html += '<tr>';
+            html += '<td style="font-weight:600;">' + name + '</td>';
+            html += '<td style="text-align:right;">-</td>';
+            html += '<td><span class="badge badge--done">' + resp.policy + '</span></td>';
+            html += '<td style="font-size:0.85rem;">' + resp.detail + '</td>';
+            html += '</tr>';
+          });
         }
-        responseAlert.classList.add('is-visible');
+
+        dirResponseBody.innerHTML = html;
+        waitingSection.style.display = 'none';
+        responseSection.style.display = 'block';
         setStep(4);
+      });
+
+      // --- 対応内容確認 → 発送報告へ ---
+      btnConfirmResponse.addEventListener('click', function () {
+        responseAlert.classList.add('is-visible');
+        setStep(5);
+      });
+
+      // --- ファイル選択時のプレビュー ---
+      var slipFiles = document.getElementById('slipFiles');
+      var fileList = document.getElementById('fileList');
+      slipFiles.addEventListener('change', function () {
+        fileList.innerHTML = '';
+        if (this.files.length > 0) {
+          var ul = document.createElement('ul');
+          ul.style.cssText = 'list-style:none; padding:0; margin:0;';
+          for (var i = 0; i < this.files.length; i++) {
+            var li = document.createElement('li');
+            li.style.cssText = 'font-size:0.85rem; color:#555; padding:2px 0;';
+            li.textContent = '\uD83D\uDCCE ' + this.files[i].name + '\uFF08' + (this.files[i].size / 1024).toFixed(1) + ' KB\uFF09';
+            ul.appendChild(li);
+          }
+          fileList.appendChild(ul);
+        }
       });
 
       // --- 発送完了報告 ---
       btnShip.addEventListener('click', function () {
-        var carrier = document.getElementById('carrier').value;
-        var tracking = document.getElementById('trackingNumber').value.trim();
         var shipDate = document.getElementById('shipDate').value;
+        var files = slipFiles.files;
 
-        if (!carrier || !tracking || !shipDate) {
-          alert('配送業者、伝票番号、発送日は必須です。');
+        if (!shipDate) {
+          alert('発送日は必須です。');
+          return;
+        }
+        if (files.length === 0) {
+          alert('伝票PDFを1つ以上添付してください。');
           return;
         }
 
         // 完了モーダル表示
-        document.getElementById('completedCarrier').textContent = carrier;
-        document.getElementById('completedTracking').textContent = tracking;
+        var fileNames = [];
+        for (var i = 0; i < files.length; i++) {
+          fileNames.push(files[i].name);
+        }
         document.getElementById('completedDate').textContent = shipDate;
+        document.getElementById('completedFiles').textContent = fileNames.join(', ');
         completeModal.classList.add('is-visible');
 
         shipAlert.classList.add('is-visible');
-        setStep(5);
+        setStep(6);
       });
 
       // --- 完了モーダルを閉じる ---
