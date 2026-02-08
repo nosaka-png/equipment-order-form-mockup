@@ -92,8 +92,9 @@
     <span class="header__role header__role--azlogi">アズロジ側</span>
   </header>
 
-  <div style="padding:0 24px; display:flex; gap:20px;">
+  <div style="padding:0 24px; display:flex; gap:20px; flex-wrap:wrap;">
     <a href="index.html" class="nav-link" style="margin:16px 0 0;">&#8592; Dir側「ALLDATA_備品発注フォーム」</a>
+    <a href="dir-response.html" class="nav-link" style="margin:16px 0 0;">&#8594; Dir「欠品対応入力」</a>
     <a href="mentor-check.html" class="nav-link" style="margin:16px 0 0;">&#8594; メンター用「備品チェック画面」</a>
   </div>
 
@@ -124,11 +125,15 @@
           </tr>
           <tr>
             <th>宛先</th>
-            <td>愛知県豊田市トヨタ町1番地 研修棟 2F</td>
+            <td>
+              〒471-8571 愛知県豊田市トヨタ町1番地<br>
+              トヨタ自動車株式会社 人材開発部 研修課<br>
+              鈴木 太郎 様　TEL: 0565-28-2121
+            </td>
           </tr>
           <tr>
-            <th>到着希望日時</th>
-            <td>2026年2月11日 10:00</td>
+            <th>到着希望</th>
+            <td>2026年2月11日　午前中（～12:00）</td>
           </tr>
           <tr>
             <th>発注日</th>
@@ -287,8 +292,9 @@
           Dir側が各欠品品目に対して対応方針を記入するまでお待ちください。<br>
           対応内容が記入されると、Slackで通知されます。
         </p>
-        <div class="btn-group">
-          <button type="button" class="btn btn--primary" id="btnSimulateDir" style="opacity:0.85;">（モック）Dir側の対応入力をシミュレート</button>
+        <div class="btn-group" style="gap:12px;">
+          <a href="dir-response.html" class="btn btn--warning" style="text-decoration:none;">Dir「欠品対応入力」画面を開く</a>
+          <button type="button" class="btn btn--primary" id="btnSimulateDir" style="opacity:0.85;">（モック）対応入力済みをシミュレート</button>
         </div>
       </div>
     </div>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>欠品対応入力（Dir側）</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .shortage-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .shortage-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: #fce4ec;
+      border-bottom: 1px solid #ef9a9a;
+    }
+    .shortage-card__header .item-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #c62828;
+    }
+    .shortage-card__header .shortage-qty {
+      font-size: 0.85rem;
+      color: #c62828;
+    }
+    .shortage-card__body {
+      padding: 16px;
+    }
+    .shortage-card__note {
+      font-size: 0.85rem;
+      color: #777;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      background: #fff8e1;
+      border-radius: 4px;
+      border-left: 3px solid #ffc107;
+    }
+    .shortage-card__note strong { color: #555; }
+
+    .response-status {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .response-status--pending {
+      background: #fff3e0;
+      color: #e65100;
+      border: 1px solid #ffcc80;
+    }
+    .response-status--done {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #a5d6a7;
+    }
+
+    .all-done-banner {
+      display: none;
+      padding: 16px 20px;
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      color: #2e7d32;
+      font-weight: 600;
+    }
+    .all-done-banner.is-visible { display: block; }
+
+    .notification-bar {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      min-width: 400px;
+      padding: 12px 20px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #a5d6a7;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .notification-bar.is-visible { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header class="header">
+    <h1 class="header__title">欠品対応入力</h1>
+    <span class="header__role header__role--dir">Dir側</span>
+  </header>
+
+  <div style="padding:0 24px; display:flex; gap:20px;">
+    <a href="index.html" class="nav-link" style="margin:16px 0 0;">&#8592; ALLDATA_備品発注フォーム</a>
+    <a href="view-form.html" class="nav-link" style="margin:16px 0 0;">&#8594; アズロジ側「閲覧用シート＆フォーム」</a>
+    <a href="mentor-check.html" class="nav-link" style="margin:16px 0 0;">&#8594; メンター用「備品チェック画面」</a>
+  </div>
+
+  <main class="main">
+
+    <!-- Slack通知モック -->
+    <div class="section" style="border-left:4px solid #e65100;">
+      <div class="section__header" style="background:#fff3e0;">
+        Slackからの通知 <span class="badge badge--shortage">欠品報告あり</span>
+      </div>
+      <div class="section__body">
+        <p style="font-size:0.9rem; color:#555; line-height:1.8;">
+          アズロジ側から欠品報告がありました。<br>
+          以下の欠品品目それぞれに対して、対応方針と詳細を入力してください。<br>
+          全品目の対応を入力後、「対応内容を送信」ボタンで アズロジ側へ通知されます。
+        </p>
+      </div>
+    </div>
+
+    <!-- 発注情報（読み取り専用） -->
+    <div class="section">
+      <div class="section__header">発注情報（参照）</div>
+      <div class="section__body">
+        <table class="readonly-table">
+          <tr>
+            <th>研修ID</th>
+            <td>00001_トヨタDX2Days 2/12-13 [DX]</td>
+          </tr>
+          <tr>
+            <th>発注者</th>
+            <td>山田 太郎（営業部）</td>
+          </tr>
+          <tr>
+            <th>宛先</th>
+            <td>
+              〒471-8571 愛知県豊田市トヨタ町1番地<br>
+              トヨタ自動車株式会社 人材開発部 研修課<br>
+              鈴木 太郎 様　TEL: 0565-28-2121
+            </td>
+          </tr>
+          <tr>
+            <th>到着希望</th>
+            <td>2026年2月11日　午前中（～12:00）</td>
+          </tr>
+          <tr>
+            <th>人数 / チーム数</th>
+            <td>20名 / 5チーム</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 全件対応完了バナー -->
+    <div class="all-done-banner" id="allDoneBanner">
+      全ての欠品品目に対応方針を入力しました。「対応内容を送信」ボタンで アズロジ側へ送信できます。
+    </div>
+
+    <!-- 欠品品目ごとの対応カード -->
+    <div id="shortageCards">
+
+      <div class="shortage-card" data-item="ノートPC">
+        <div class="shortage-card__header">
+          <span class="item-name">ノートPC</span>
+          <span class="shortage-qty">欠品数: 5 / 発注数: 20</span>
+        </div>
+        <div class="shortage-card__body">
+          <div class="shortage-card__note">
+            <strong>アズロジ備考:</strong> 在庫15台のみ。残り5台は現在入荷待ちの状況です。
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <span style="font-size:0.85rem; color:#555;">対応ステータス:</span>
+            <span class="response-status response-status--pending item-status">未入力</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">対応方針 <span class="required">※必須</span></label>
+            <select class="form-select item-policy">
+              <option value="">-- 選択してください --</option>
+              <option value="代替品手配">代替品を手配</option>
+              <option value="入荷待ち">入荷待ち（後日発送）</option>
+              <option value="在庫分のみ先行発送">在庫分のみ先行発送</option>
+              <option value="キャンセル">該当品目はキャンセル</option>
+              <option value="対応不要">対応不要（在庫確認済み）</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">対応詳細</label>
+            <textarea class="form-textarea item-detail" placeholder="具体的な対応内容・代替品情報・入荷予定日などを記入してください" style="min-height:70px;"></textarea>
+          </div>
+          <div class="btn-group" style="justify-content:flex-start;">
+            <button type="button" class="btn btn--primary btn-save-item" style="font-size:0.85rem; padding:6px 20px;">この品目の対応を保存</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="shortage-card" data-item="マウス">
+        <div class="shortage-card__header">
+          <span class="item-name">マウス</span>
+          <span class="shortage-qty">欠品数: 5 / 発注数: 20</span>
+        </div>
+        <div class="shortage-card__body">
+          <div class="shortage-card__note">
+            <strong>アズロジ備考:</strong> 在庫15個。残り5個はメーカー欠品中。
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <span style="font-size:0.85rem; color:#555;">対応ステータス:</span>
+            <span class="response-status response-status--pending item-status">未入力</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">対応方針 <span class="required">※必須</span></label>
+            <select class="form-select item-policy">
+              <option value="">-- 選択してください --</option>
+              <option value="代替品手配">代替品を手配</option>
+              <option value="入荷待ち">入荷待ち（後日発送）</option>
+              <option value="在庫分のみ先行発送">在庫分のみ先行発送</option>
+              <option value="キャンセル">該当品目はキャンセル</option>
+              <option value="対応不要">対応不要（在庫確認済み）</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">対応詳細</label>
+            <textarea class="form-textarea item-detail" placeholder="具体的な対応内容・代替品情報・入荷予定日などを記入してください" style="min-height:70px;"></textarea>
+          </div>
+          <div class="btn-group" style="justify-content:flex-start;">
+            <button type="button" class="btn btn--primary btn-save-item" style="font-size:0.85rem; padding:6px 20px;">この品目の対応を保存</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="shortage-card" data-item="モニター（24インチ）">
+        <div class="shortage-card__header">
+          <span class="item-name">モニター（24インチ）</span>
+          <span class="shortage-qty">欠品数: 2 / 発注数: 5</span>
+        </div>
+        <div class="shortage-card__body">
+          <div class="shortage-card__note">
+            <strong>アズロジ備考:</strong> 在庫3台。2台不足。次回入荷は2/10の見込み。
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <span style="font-size:0.85rem; color:#555;">対応ステータス:</span>
+            <span class="response-status response-status--pending item-status">未入力</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">対応方針 <span class="required">※必須</span></label>
+            <select class="form-select item-policy">
+              <option value="">-- 選択してください --</option>
+              <option value="代替品手配">代替品を手配</option>
+              <option value="入荷待ち">入荷待ち（後日発送）</option>
+              <option value="在庫分のみ先行発送">在庫分のみ先行発送</option>
+              <option value="キャンセル">該当品目はキャンセル</option>
+              <option value="対応不要">対応不要（在庫確認済み）</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">対応詳細</label>
+            <textarea class="form-textarea item-detail" placeholder="具体的な対応内容・代替品情報・入荷予定日などを記入してください" style="min-height:70px;"></textarea>
+          </div>
+          <div class="btn-group" style="justify-content:flex-start;">
+            <button type="button" class="btn btn--primary btn-save-item" style="font-size:0.85rem; padding:6px 20px;">この品目の対応を保存</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="shortage-card" data-item="付箋（大）">
+        <div class="shortage-card__header">
+          <span class="item-name">付箋（大）</span>
+          <span class="shortage-qty">欠品数: 8 / 発注数: 20</span>
+        </div>
+        <div class="shortage-card__body">
+          <div class="shortage-card__note">
+            <strong>アズロジ備考:</strong> 在庫12個。3M製が品切れのため他メーカーでの代替可否を確認したい。
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <span style="font-size:0.85rem; color:#555;">対応ステータス:</span>
+            <span class="response-status response-status--pending item-status">未入力</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">対応方針 <span class="required">※必須</span></label>
+            <select class="form-select item-policy">
+              <option value="">-- 選択してください --</option>
+              <option value="代替品手配">代替品を手配</option>
+              <option value="入荷待ち">入荷待ち（後日発送）</option>
+              <option value="在庫分のみ先行発送">在庫分のみ先行発送</option>
+              <option value="キャンセル">該当品目はキャンセル</option>
+              <option value="対応不要">対応不要（在庫確認済み）</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">対応詳細</label>
+            <textarea class="form-textarea item-detail" placeholder="具体的な対応内容・代替品情報・入荷予定日などを記入してください" style="min-height:70px;"></textarea>
+          </div>
+          <div class="btn-group" style="justify-content:flex-start;">
+            <button type="button" class="btn btn--primary btn-save-item" style="font-size:0.85rem; padding:6px 20px;">この品目の対応を保存</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 対応サマリー -->
+    <div class="section" id="summarySection" style="display:none;">
+      <div class="section__header">対応内容サマリー</div>
+      <div class="section__body">
+        <div class="table-wrap">
+          <table class="data-table" id="summaryTable">
+            <thead>
+              <tr>
+                <th>品目名</th>
+                <th>欠品数</th>
+                <th>対応方針</th>
+                <th>対応詳細</th>
+              </tr>
+            </thead>
+            <tbody id="summaryBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 送信ボタン -->
+    <div class="btn-group">
+      <button type="button" class="btn btn--success" id="btnSubmitAll" disabled>対応内容を送信（アズロジへ通知）</button>
+    </div>
+
+  </main>
+
+  <!-- 送信確認モーダル -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <div class="modal__title">対応内容の送信確認</div>
+      <div class="modal__message" id="confirmMessage"></div>
+      <div class="modal__actions">
+        <button class="btn btn--cancel" id="btnConfirmCancel">キャンセル</button>
+        <button class="btn btn--success" id="btnConfirmSend">送信する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通知バー -->
+  <div class="notification-bar" id="notificationBar">
+    対応内容をアズロジ側へ送信しました。Slackで通知されます。
+  </div>
+
+  <footer class="footer">
+    備品発注フォーム モックアップ &copy; 2026
+  </footer>
+
+  <script>
+  (function () {
+    var cards = document.querySelectorAll('.shortage-card');
+    var btnSubmitAll = document.getElementById('btnSubmitAll');
+    var allDoneBanner = document.getElementById('allDoneBanner');
+    var summarySection = document.getElementById('summarySection');
+    var summaryBody = document.getElementById('summaryBody');
+    var confirmModal = document.getElementById('confirmModal');
+    var confirmMessage = document.getElementById('confirmMessage');
+    var notificationBar = document.getElementById('notificationBar');
+
+    // 各カードの「保存」ボタン
+    cards.forEach(function (card) {
+      var btnSave = card.querySelector('.btn-save-item');
+      var policySelect = card.querySelector('.item-policy');
+      var detailText = card.querySelector('.item-detail');
+      var statusBadge = card.querySelector('.item-status');
+
+      btnSave.addEventListener('click', function () {
+        if (!policySelect.value) {
+          alert('対応方針を選択してください。');
+          return;
+        }
+
+        // ステータス更新
+        statusBadge.textContent = policySelect.value;
+        statusBadge.className = 'response-status response-status--done item-status';
+
+        // カードヘッダーを緑に変更
+        var header = card.querySelector('.shortage-card__header');
+        header.style.background = '#e8f5e9';
+        header.style.borderBottomColor = '#a5d6a7';
+        header.querySelector('.item-name').style.color = '#2e7d32';
+        header.querySelector('.shortage-qty').style.color = '#2e7d32';
+
+        // 入力欄を読み取り専用に
+        policySelect.disabled = true;
+        detailText.readOnly = true;
+        detailText.style.background = '#f5f5f5';
+        btnSave.textContent = '保存済み';
+        btnSave.disabled = true;
+        btnSave.style.opacity = '0.5';
+
+        checkAllDone();
+      });
+    });
+
+    // 全カード対応済みかチェック
+    function checkAllDone() {
+      var allDone = true;
+      cards.forEach(function (card) {
+        var status = card.querySelector('.item-status');
+        if (status.classList.contains('response-status--pending')) {
+          allDone = false;
+        }
+      });
+
+      if (allDone) {
+        allDoneBanner.classList.add('is-visible');
+        btnSubmitAll.disabled = false;
+        renderSummary();
+        summarySection.style.display = 'block';
+      }
+    }
+
+    // サマリーテーブル描画
+    function renderSummary() {
+      var html = '';
+      cards.forEach(function (card) {
+        var itemName = card.dataset.item;
+        var qtyText = card.querySelector('.shortage-qty').textContent;
+        var policy = card.querySelector('.item-policy').value;
+        var detail = card.querySelector('.item-detail').value || '—';
+        html += '<tr>';
+        html += '<td style="font-weight:600;">' + itemName + '</td>';
+        html += '<td>' + qtyText.replace('欠品数: ', '').replace(/ \/ 発注数:.*/, '') + '</td>';
+        html += '<td><span class="badge badge--done">' + policy + '</span></td>';
+        html += '<td style="font-size:0.85rem;">' + detail + '</td>';
+        html += '</tr>';
+      });
+      summaryBody.innerHTML = html;
+    }
+
+    // 送信ボタン
+    btnSubmitAll.addEventListener('click', function () {
+      var items = [];
+      cards.forEach(function (card) {
+        items.push('・' + card.dataset.item + ': ' + card.querySelector('.item-policy').value);
+      });
+
+      confirmMessage.innerHTML =
+        '以下の対応内容をアズロジ側へ送信します。<br><br>' +
+        items.join('<br>') +
+        '<br><br>送信後、アズロジ側に Slack 通知されます。<br>よろしいですか？';
+
+      confirmModal.classList.add('is-visible');
+    });
+
+    // モーダル操作
+    document.getElementById('btnConfirmCancel').addEventListener('click', function () {
+      confirmModal.classList.remove('is-visible');
+    });
+
+    document.getElementById('btnConfirmSend').addEventListener('click', function () {
+      confirmModal.classList.remove('is-visible');
+
+      // 通知バー表示
+      notificationBar.classList.add('is-visible');
+      setTimeout(function () {
+        notificationBar.classList.remove('is-visible');
+      }, 4000);
+
+      // 送信ボタン無効化
+      btnSubmitAll.textContent = '送信済み';
+      btnSubmitAll.disabled = true;
+      btnSubmitAll.style.opacity = '0.5';
+    });
+
+    confirmModal.addEventListener('click', function (e) {
+      if (e.target === confirmModal) confirmModal.classList.remove('is-visible');
+    });
+
+  })();
+  </script>
+
+</body>
+</html>

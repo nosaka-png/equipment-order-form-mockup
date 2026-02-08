@@ -15,6 +15,70 @@
     .option-badge { display:inline-block; padding:1px 8px; border-radius:3px; font-size:0.72rem; font-weight:600; background:#fff3e0; color:#e65100; margin-left:6px; vertical-align:middle; }
     #equipmentSection { display:none; }
     #equipmentSection.is-visible { display:block; }
+
+    /* メンター オートコンプリート */
+    .mentor-search-wrap { position: relative; }
+    .mentor-search {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+    .mentor-search:focus { outline:none; border-color:#1976d2; box-shadow:0 0 0 2px rgba(25,118,210,0.15); }
+    .mentor-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .mentor-dropdown.is-open { display: block; }
+    .mentor-dropdown-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .mentor-dropdown-item:hover { background: #e3f2fd; }
+    .mentor-dropdown-item .mentor-email { color: #999; font-size: 0.78rem; }
+    .mentor-dropdown-empty { padding: 10px 12px; color: #999; font-size: 0.85rem; }
+
+    .selected-mentors { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .mentor-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e3f2fd;
+      color: #1565c0;
+      border: 1px solid #90caf9;
+      border-radius: 16px;
+      padding: 4px 10px 4px 14px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .mentor-tag .tag-remove {
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: #1565c0;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0 2px;
+      opacity: 0.6;
+    }
+    .mentor-tag .tag-remove:hover { opacity: 1; }
   </style>
 </head>
 <body>
@@ -25,8 +89,9 @@
     <span class="header__role header__role--dir">Dir側</span>
   </header>
 
-  <div style="padding:0 24px; display:flex; gap:20px;">
+  <div style="padding:0 24px; display:flex; gap:20px; flex-wrap:wrap;">
     <a href="view-form.html" class="nav-link" style="margin:16px 0 0;">&#8594; アズロジ側「閲覧用シート＆フォーム」</a>
+    <a href="dir-response.html" class="nav-link" style="margin:16px 0 0;">&#8594; Dir「欠品対応入力」</a>
     <a href="mentor-check.html" class="nav-link" style="margin:16px 0 0;">&#8594; メンター用「備品チェック画面」</a>
   </div>
 
@@ -67,14 +132,57 @@
             <option value="">-- 研修を選択してください --</option>
           </select>
         </div>
-        <div class="form-inline" style="margin-top:12px;">
+        <!-- 宛先 -->
+        <div style="margin-top:16px; padding:14px 16px; background:#fafafa; border:1px solid #eee; border-radius:4px;">
+          <label class="form-label" style="margin-bottom:10px; font-size:0.95rem;">宛先情報 <span class="required">※必須</span></label>
+          <div class="form-inline">
+            <div class="form-group" style="flex:0 0 140px; min-width:140px;">
+              <label class="form-label">郵便番号</label>
+              <input type="text" class="form-input" placeholder="例：100-0005" id="destZip" maxlength="8">
+            </div>
+            <div class="form-group" style="flex:2;">
+              <label class="form-label">住所</label>
+              <input type="text" class="form-input" placeholder="例：東京都千代田区丸の内1-1-1" id="destAddress">
+            </div>
+          </div>
+          <div class="form-inline" style="margin-top:8px;">
+            <div class="form-group">
+              <label class="form-label">会社名</label>
+              <input type="text" class="form-input" placeholder="例：株式会社トヨタ自動車" id="destCompany">
+            </div>
+            <div class="form-group">
+              <label class="form-label">部署名</label>
+              <input type="text" class="form-input" placeholder="例：人材開発部 研修課" id="destDept">
+            </div>
+          </div>
+          <div class="form-inline" style="margin-top:8px;">
+            <div class="form-group">
+              <label class="form-label">宛名</label>
+              <input type="text" class="form-input" placeholder="例：鈴木 太郎 様" id="destName">
+            </div>
+            <div class="form-group" style="flex:0 0 200px; min-width:200px;">
+              <label class="form-label">電話番号</label>
+              <input type="tel" class="form-input" placeholder="例：03-1234-5678" id="destPhone">
+            </div>
+          </div>
+        </div>
+
+        <!-- 到着希望 -->
+        <div class="form-inline" style="margin-top:16px;">
           <div class="form-group">
-            <label class="form-label">宛先 <span class="required">※必須</span></label>
-            <input type="text" class="form-input" placeholder="例：東京都千代田区丸の内1-1-1 〇〇ビル 3F" id="destination">
+            <label class="form-label">到着希望日 <span class="required">※必須</span></label>
+            <input type="date" class="form-input" id="arrivalDate">
           </div>
           <div class="form-group">
-            <label class="form-label">到着希望日時 <span class="required">※必須</span></label>
-            <input type="datetime-local" class="form-input" id="arrivalDate">
+            <label class="form-label">希望時間帯 <span class="required">※必須</span></label>
+            <select class="form-select" id="arrivalTimeSlot">
+              <option value="">-- 時間帯を選択 --</option>
+              <option value="午前中">午前中（～12:00）</option>
+              <option value="14:00-16:00">14:00～16:00</option>
+              <option value="16:00-18:00">16:00～18:00</option>
+              <option value="18:00-20:00">18:00～20:00</option>
+              <option value="19:00-21:00">19:00～21:00</option>
+            </select>
           </div>
         </div>
       </div>
@@ -141,16 +249,13 @@
       <div class="section__body">
         <p style="font-size:0.85rem; color:#777; margin-bottom:12px;">
           現場で備品の受取・返送チェックを行うメンター（アルバイトスタッフ）を指定してください。<br>
-          指定されたメンターのみが備品チェック画面を閲覧できます。
+          名前を入力すると候補が表示されます。複数名選択できます。
         </p>
-        <div id="mentorList">
-          <div class="mentor-row" style="display:flex; gap:12px; align-items:center; margin-bottom:8px;">
-            <input type="text" class="form-input" placeholder="名前（例：佐藤 花子）" style="flex:1;">
-            <input type="email" class="form-input" placeholder="メール（例：sato@example.com）" style="flex:1.5;">
-            <button type="button" class="btn-remove-mentor" title="削除" style="background:none; border:1px solid #e0e0e0; border-radius:4px; padding:6px 10px; cursor:pointer; color:#999; font-size:0.9rem;">&times;</button>
-          </div>
+        <div class="mentor-search-wrap">
+          <input type="text" class="mentor-search" id="mentorSearch" placeholder="メンター名を入力して検索..." autocomplete="off">
+          <div class="mentor-dropdown" id="mentorDropdown"></div>
         </div>
-        <button type="button" class="btn" id="btnAddMentor" style="background:#f5f5f5; color:#555; border:1px solid #ccc; font-size:0.85rem; padding:6px 16px; margin-top:4px;">+ メンターを追加</button>
+        <div class="selected-mentors" id="selectedMentors"></div>
       </div>
     </div>
 
@@ -428,30 +533,109 @@
     }
 
     // ==============================
-    // メンター追加・削除
+    // メンターDB（ダミー）
     // ==============================
-    var btnAddMentor = document.getElementById('btnAddMentor');
-    var mentorList = document.getElementById('mentorList');
+    var mentorDB = [
+      { id: 'M001', name: '佐藤 花子',   email: 'sato.hanako@example.com',   area: '東京' },
+      { id: 'M002', name: '田中 一郎',   email: 'tanaka.ichiro@example.com',  area: '東京' },
+      { id: 'M003', name: '鈴木 美咲',   email: 'suzuki.misaki@example.com',  area: '大阪' },
+      { id: 'M004', name: '高橋 健太',   email: 'takahashi.kenta@example.com',area: '名古屋' },
+      { id: 'M005', name: '伊藤 さくら', email: 'ito.sakura@example.com',     area: '東京' },
+      { id: 'M006', name: '渡辺 翔太',   email: 'watanabe.shota@example.com', area: '福岡' },
+      { id: 'M007', name: '山本 あかり', email: 'yamamoto.akari@example.com', area: '大阪' },
+      { id: 'M008', name: '中村 大輝',   email: 'nakamura.daiki@example.com', area: '東京' },
+      { id: 'M009', name: '小林 真由',   email: 'kobayashi.mayu@example.com', area: '名古屋' },
+      { id: 'M010', name: '加藤 陸',     email: 'kato.riku@example.com',      area: '東京' },
+      { id: 'M011', name: '吉田 愛',     email: 'yoshida.ai@example.com',     area: '大阪' },
+      { id: 'M012', name: '松本 蓮',     email: 'matsumoto.ren@example.com',  area: '福岡' },
+      { id: 'M013', name: '井上 七海',   email: 'inoue.nanami@example.com',   area: '東京' },
+      { id: 'M014', name: '木村 颯太',   email: 'kimura.sota@example.com',    area: '名古屋' },
+      { id: 'M015', name: '林 ひなた',   email: 'hayashi.hinata@example.com', area: '大阪' }
+    ];
 
-    btnAddMentor.addEventListener('click', function () {
-      var row = document.createElement('div');
-      row.className = 'mentor-row';
-      row.style.cssText = 'display:flex; gap:12px; align-items:center; margin-bottom:8px;';
-      row.innerHTML =
-        '<input type="text" class="form-input" placeholder="名前（例：佐藤 花子）" style="flex:1;">' +
-        '<input type="email" class="form-input" placeholder="メール（例：sato@example.com）" style="flex:1.5;">' +
-        '<button type="button" class="btn-remove-mentor" title="削除" style="background:none; border:1px solid #e0e0e0; border-radius:4px; padding:6px 10px; cursor:pointer; color:#999; font-size:0.9rem;">&times;</button>';
-      mentorList.appendChild(row);
+    // ==============================
+    // メンター オートコンプリート
+    // ==============================
+    var mentorSearch = document.getElementById('mentorSearch');
+    var mentorDropdown = document.getElementById('mentorDropdown');
+    var selectedMentorsEl = document.getElementById('selectedMentors');
+    var selectedMentorIds = [];
+
+    function renderSelectedMentors() {
+      selectedMentorsEl.innerHTML = '';
+      selectedMentorIds.forEach(function (id) {
+        var m = mentorDB.find(function (x) { return x.id === id; });
+        if (!m) return;
+        var tag = document.createElement('span');
+        tag.className = 'mentor-tag';
+        tag.innerHTML = m.name + '<span class="tag-email" style="color:#90caf9; font-size:0.78rem; margin-left:2px;">(' + m.area + ')</span>' +
+          '<button class="tag-remove" data-id="' + m.id + '">&times;</button>';
+        selectedMentorsEl.appendChild(tag);
+      });
+    }
+
+    // タグ削除
+    selectedMentorsEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('.tag-remove');
+      if (btn) {
+        var id = btn.dataset.id;
+        selectedMentorIds = selectedMentorIds.filter(function (x) { return x !== id; });
+        renderSelectedMentors();
+      }
     });
 
-    mentorList.addEventListener('click', function (e) {
-      if (e.target.classList.contains('btn-remove-mentor')) {
-        var rows = mentorList.querySelectorAll('.mentor-row');
-        if (rows.length > 1) {
-          e.target.closest('.mentor-row').remove();
-        } else {
-          alert('メンターは最低1名必要です。');
+    // 検索入力
+    mentorSearch.addEventListener('input', function () {
+      var query = this.value.trim().toLowerCase();
+      if (query.length === 0) {
+        mentorDropdown.classList.remove('is-open');
+        return;
+      }
+
+      var results = mentorDB.filter(function (m) {
+        if (selectedMentorIds.indexOf(m.id) !== -1) return false;
+        return m.name.toLowerCase().indexOf(query) !== -1 ||
+               m.email.toLowerCase().indexOf(query) !== -1 ||
+               m.area.toLowerCase().indexOf(query) !== -1;
+      });
+
+      if (results.length === 0) {
+        mentorDropdown.innerHTML = '<div class="mentor-dropdown-empty">該当するメンターが見つかりません</div>';
+      } else {
+        mentorDropdown.innerHTML = results.map(function (m) {
+          return '<div class="mentor-dropdown-item" data-id="' + m.id + '">' +
+            '<span>' + m.name + ' <span style="color:#999; font-size:0.78rem;">(' + m.area + ')</span></span>' +
+            '<span class="mentor-email">' + m.email + '</span>' +
+            '</div>';
+        }).join('');
+      }
+      mentorDropdown.classList.add('is-open');
+    });
+
+    // ドロップダウン選択
+    mentorDropdown.addEventListener('click', function (e) {
+      var item = e.target.closest('.mentor-dropdown-item');
+      if (item) {
+        var id = item.dataset.id;
+        if (selectedMentorIds.indexOf(id) === -1) {
+          selectedMentorIds.push(id);
+          renderSelectedMentors();
         }
+        mentorSearch.value = '';
+        mentorDropdown.classList.remove('is-open');
+        mentorSearch.focus();
+      }
+    });
+
+    // フォーカスが外れたらドロップダウンを閉じる
+    mentorSearch.addEventListener('blur', function () {
+      setTimeout(function () { mentorDropdown.classList.remove('is-open'); }, 200);
+    });
+
+    // フォーカス時に入力があれば再表示
+    mentorSearch.addEventListener('focus', function () {
+      if (this.value.trim().length > 0) {
+        this.dispatchEvent(new Event('input'));
       }
     });
 
@@ -461,8 +645,18 @@
     btnOrder.addEventListener('click', function () {
       var ordererName = document.getElementById('ordererName').value.trim();
       var department = document.getElementById('department').value;
-      var destination = document.getElementById('destination').value.trim();
+
+      // 宛先情報
+      var destZip = document.getElementById('destZip').value.trim();
+      var destAddress = document.getElementById('destAddress').value.trim();
+      var destCompany = document.getElementById('destCompany').value.trim();
+      var destDept = document.getElementById('destDept').value.trim();
+      var destName = document.getElementById('destName').value.trim();
+      var destPhone = document.getElementById('destPhone').value.trim();
+
+      // 到着希望
       var arrivalDate = document.getElementById('arrivalDate').value;
+      var arrivalTimeSlot = document.getElementById('arrivalTimeSlot').value;
 
       if (!ordererName || !department) {
         alert('発注者名と所属部署は必須項目です。');
@@ -472,8 +666,12 @@
         alert('研修IDを選択してください。');
         return;
       }
-      if (!destination || !arrivalDate) {
-        alert('宛先と到着希望日時は必須項目です。');
+      if (!destZip || !destAddress || !destCompany || !destName || !destPhone) {
+        alert('宛先情報（郵便番号・住所・会社名・宛名・電話番号）は必須です。');
+        return;
+      }
+      if (!arrivalDate || !arrivalTimeSlot) {
+        alert('到着希望日と希望時間帯を選択してください。');
         return;
       }
 
@@ -503,24 +701,22 @@
         return;
       }
 
-      var arrivalStr = arrivalDate.replace('T', ' ');
+      // 宛先文字列を組み立て
+      var destStr = '〒' + destZip + ' ' + destAddress + '<br>' +
+        destCompany + (destDept ? ' ' + destDept : '') + '<br>' +
+        destName + '　TEL: ' + destPhone;
 
       // メンター情報を収集
-      var mentors = [];
-      mentorList.querySelectorAll('.mentor-row').forEach(function (row) {
-        var inputs = row.querySelectorAll('input');
-        var mName = inputs[0].value.trim();
-        var mEmail = inputs[1].value.trim();
-        if (mName && mEmail) {
-          mentors.push(mName + '（' + mEmail + '）');
-        }
-      });
+      var mentors = selectedMentorIds.map(function (id) {
+        var m = mentorDB.find(function (x) { return x.id === id; });
+        return m ? m.name + '（' + m.email + '）' : '';
+      }).filter(function (x) { return x; });
 
       modalMessage.innerHTML =
         '<strong>発注者:</strong> ' + ordererName + '（' + department + '）<br>' +
-        '<strong>研修:</strong> ' + currentTraining.name + '<br>' +
-        '<strong>宛先:</strong> ' + destination + '<br>' +
-        '<strong>到着希望:</strong> ' + arrivalStr + '<br>' +
+        '<strong>研修:</strong> ' + currentTraining.name + '<br><br>' +
+        '<strong>宛先:</strong><br>' + destStr + '<br><br>' +
+        '<strong>到着希望:</strong> ' + arrivalDate + '　' + arrivalTimeSlot + '<br>' +
         '<strong>人数:</strong> ' + people + '名 / <strong>チーム数:</strong> ' + teams + '<br><br>' +
         '<strong>発注品目:</strong><br>' +
         selectedItems.map(function (item) { return '・' + item; }).join('<br>') +
