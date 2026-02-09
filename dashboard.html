@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>備品発送ダッシュボード</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .dashboard-header {
+      background: linear-gradient(135deg, #1565c0, #1976d2);
+      color: #fff;
+      padding: 28px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .dashboard-header h1 { font-size: 1.4rem; }
+    .dashboard-header .user-info { font-size: 0.85rem; opacity: 0.85; }
+
+    .stat-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+    }
+    .stat-card--total::before { background: #1976d2; }
+    .stat-card--progress::before { background: #e65100; }
+    .stat-card--shortage::before { background: #c62828; }
+    .stat-card--shipped::before { background: #2e7d32; }
+    .stat-card--done::before { background: #7b1fa2; }
+    .stat-card__value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .stat-card--total .stat-card__value { color: #1976d2; }
+    .stat-card--progress .stat-card__value { color: #e65100; }
+    .stat-card--shortage .stat-card__value { color: #c62828; }
+    .stat-card--shipped .stat-card__value { color: #2e7d32; }
+    .stat-card--done .stat-card__value { color: #7b1fa2; }
+    .stat-card__label {
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    .order-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .order-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .order-card__top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .order-card__id {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #333;
+    }
+    .order-card__body {
+      padding: 16px 20px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .order-card__info {
+      flex: 2;
+      min-width: 280px;
+    }
+    .order-card__info-row {
+      display: flex;
+      font-size: 0.85rem;
+      padding: 3px 0;
+    }
+    .order-card__info-row dt {
+      width: 100px;
+      color: #999;
+      flex-shrink: 0;
+    }
+    .order-card__info-row dd { color: #333; }
+    .order-card__actions {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .order-card__actions a {
+      display: block;
+      padding: 7px 14px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      transition: background 0.15s;
+    }
+    .action-link--dir {
+      background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9;
+    }
+    .action-link--dir:hover { background: #bbdefb; }
+    .action-link--azlogi {
+      background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;
+    }
+    .action-link--azlogi:hover { background: #c8e6c9; }
+    .action-link--response {
+      background: #fff3e0; color: #e65100; border: 1px solid #ffcc80;
+    }
+    .action-link--response:hover { background: #ffe0b2; }
+    .action-link--mentor {
+      background: #fce4ec; color: #c62828; border: 1px solid #ef9a9a;
+    }
+    .action-link--mentor:hover { background: #f8bbd0; }
+
+    .status-pill {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .status-pill--draft { background: #f5f5f5; color: #999; border: 1px solid #e0e0e0; }
+    .status-pill--ordered { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
+    .status-pill--shortage { background: #fce4ec; color: #c62828; border: 1px solid #ef9a9a; }
+    .status-pill--responding { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+    .status-pill--shipping { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .status-pill--shipped { background: #e8f5e9; color: #1b5e20; border: 1px solid #66bb6a; }
+    .status-pill--done { background: #f3e5f5; color: #7b1fa2; border: 1px solid #ce93d8; }
+
+    .progress-mini {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .progress-mini__bar {
+      flex: 1;
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-mini__fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+    .progress-mini__label { font-size: 0.75rem; color: #999; white-space: nowrap; }
+
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      background: #fff;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #777;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover { border-color: #1976d2; color: #1976d2; }
+    .filter-btn.is-active {
+      background: #1976d2;
+      color: #fff;
+      border-color: #1976d2;
+    }
+
+    @media (max-width: 768px) {
+      .stat-row { flex-wrap: wrap; }
+      .stat-card { min-width: calc(50% - 8px); }
+      .order-card__body { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="dashboard-header">
+    <div>
+      <h1>備品発送ダッシュボード</h1>
+      <div class="user-info">Dir側 管理画面 ― 山田 太郎（営業部）</div>
+    </div>
+    <a href="index.html" class="btn btn--primary" style="font-size:0.85rem; padding:8px 20px; text-decoration:none;">+ 新規発注</a>
+  </header>
+
+  <main class="main" style="margin-top:24px;">
+
+    <!-- 集計カード -->
+    <div class="stat-row">
+      <div class="stat-card stat-card--total">
+        <div class="stat-card__value">8</div>
+        <div class="stat-card__label">案件総数</div>
+      </div>
+      <div class="stat-card stat-card--progress">
+        <div class="stat-card__value">3</div>
+        <div class="stat-card__label">対応中</div>
+      </div>
+      <div class="stat-card stat-card--shortage">
+        <div class="stat-card__value">1</div>
+        <div class="stat-card__label">欠品対応待ち</div>
+      </div>
+      <div class="stat-card stat-card--shipped">
+        <div class="stat-card__value">2</div>
+        <div class="stat-card__label">発送済み</div>
+      </div>
+      <div class="stat-card stat-card--done">
+        <div class="stat-card__value">2</div>
+        <div class="stat-card__label">完了</div>
+      </div>
+    </div>
+
+    <!-- フィルター -->
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn is-active" data-filter="all">すべて (8)</button>
+      <button class="filter-btn" data-filter="ordered">発注済み (1)</button>
+      <button class="filter-btn" data-filter="shortage">欠品対応 (1)</button>
+      <button class="filter-btn" data-filter="responding">Dir対応中 (1)</button>
+      <button class="filter-btn" data-filter="shipping">発送準備中 (1)</button>
+      <button class="filter-btn" data-filter="shipped">発送済み (2)</button>
+      <button class="filter-btn" data-filter="done">完了 (2)</button>
+    </div>
+
+    <!-- 案件一覧 -->
+    <div id="orderList">
+
+      <!-- 案件1: 欠品対応中 -->
+      <div class="order-card" data-status="shortage">
+        <div class="order-card__top">
+          <span class="order-card__id">00001_トヨタDX2Days 2/12-13</span>
+          <span class="status-pill status-pill--shortage">欠品対応待ち</span>
+        </div>
+        <div class="order-card__body">
+          <div class="order-card__info">
+            <dl class="order-card__info-row"><dt>種別</dt><dd>DX</dd></dl>
+            <dl class="order-card__info-row"><dt>発注日</dt><dd>2026/02/08</dd></dl>
+            <dl class="order-card__info-row"><dt>到着希望</dt><dd>2026/02/11 午前中</dd></dl>
+            <dl class="order-card__info-row"><dt>宛先</dt><dd>トヨタ自動車 人材開発部</dd></dl>
+            <dl class="order-card__info-row"><dt>人数</dt><dd>20名 / 5チーム</dd></dl>
+            <dl class="order-card__info-row"><dt>メンター</dt><dd>佐藤花子, 田中一郎</dd></dl>
+            <dl class="order-card__info-row"><dt>欠品</dt><dd style="color:#c62828; font-weight:600;">4品目に欠品あり</dd></dl>
+          </div>
+          <div class="order-card__actions">
+            <a href="index.html" class="action-link--dir">発注フォーム</a>
+            <a href="view-form.html" class="action-link--azlogi">アズロジ側フォーム</a>
+            <a href="dir-response.html" class="action-link--response">欠品対応入力</a>
+            <a href="mentor-check.html" class="action-link--mentor">メンターチェック</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 案件2: Dir対応中 -->
+      <div class="order-card" data-status="responding">
+        <div class="order-card__top">
+          <span class="order-card__id">00002_ソニーDXアドバンス1Day 2/20</span>
+          <span class="status-pill status-pill--responding">Dir対応中</span>
+        </div>
+        <div class="order-card__body">
+          <div class="order-card__info">
+            <dl class="order-card__info-row"><dt>種別</dt><dd>DX</dd></dl>
+            <dl class="order-card__info-row"><dt>発注日</dt><dd>2026/02/06</dd></dl>
+            <dl class="order-card__info-row"><dt>到着希望</dt><dd>2026/02/19 14:00-16:00</dd></dl>
+            <dl class="order-card__info-row"><dt>宛先</dt><dd>ソニーグループ 人事部</dd></dl>
+            <dl class="order-card__info-row"><dt>人数</dt><dd>15名 / 3チーム</dd></dl>
+            <dl class="order-card__info-row"><dt>メンター</dt><dd>鈴木美咲</dd></dl>
+            <div class="progress-mini">
+              <div class="progress-mini__bar"><div class="progress-mini__fill" style="width:50%; background:#e65100;"></div></div>
+              <span class="progress-mini__label">対応 2/4 品目</span>
+            </div>
+          </div>
+          <div class="order-card__actions">
+            <a href="index.html" class="action-link--dir">発注フォーム</a>
+            <a href="dir-response.html" class="action-link--response">欠品対応入力</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 案件3: 発注済み -->
+      <div class="order-card" data-status="ordered">
+        <div class="order-card__top">
+          <span class="order-card__id">00003_日立AI入門2Days 3/5-6</span>
+          <span class="status-pill status-pill--ordered">発注済み</span>
+        </div>
+        <div class="order-card__body">
+          <div class="order-card__info">
+            <dl class="order-card__info-row"><dt>種別</dt><dd>AI</dd></dl>
+            <dl class="order-card__info-row"><dt>発注日</dt><dd>2026/02/08</dd></dl>
+            <dl class="order-card__info-row"><dt>到着希望</dt><dd>2026/03/04 午前中</dd></dl>
+            <dl class="order-card__info-row"><dt>宛先</dt><dd>日立製作所 研修センター</dd></dl>
+            <dl class="order-card__info-row"><dt>人数</dt><dd>30名 / 6チーム</dd></dl>
+            <dl class="order-card__info-row"><dt>メンター</dt><dd>高橋健太, 伊藤さくら</dd></dl>
+          </div>
+          <div class="order-card__actions">
+            <a href="index.html" class="action-link--dir">発注フォーム</a>
+            <a href="view-form.html" class="action-link--azlogi">アズロジ側フォーム</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 案件4: 発送準備中 -->
+      <div class="order-card" data-status="shipping">
+        <div class="order-card__top">
+          <span class="order-card__id">00005_パナソニックCD研修1Day 3/15</span>
+          <span class="status-pill status-pill--shipping">発送準備中</span>
+        </div>
+        <div class="order-card__body">
+          <div class="order-card__info">
+            <dl class="order-card__info-row"><dt>種別</dt><dd>CD</dd></dl>
+            <dl class="order-card__info-row"><dt>発注日</dt><dd>2026/02/01</dd></dl>
+            <dl class="order-card__info-row"><dt>到着希望</dt><dd>2026/03/14 14:00-16:00</dd></dl>
+            <dl class="order-card__info-row"><dt>宛先</dt><dd>パナソニック 人材育成部</dd></dl>
+            <dl class="order-card__info-row"><dt>人数</dt><dd>12名 / 4チーム</dd></dl>
+            <dl class="order-card__info-row"><dt>メンター</dt><dd>渡辺翔太</dd></dl>
+          </div>
+          <div class="order-card__actions">
+            <a href="view-form.html" class="action-link--azlogi">アズロジ側フォーム</a>
+            <a href="mentor-check.html" class="action-link--mentor">メンターチェック</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 案件5: 発送済み -->
+      <div class="order-card" data-status="shipped">
+        <div class="order-card__top">
+          <span class="order-card__id">00006_NEC模造紙WS1Day 3/18</span>
+          <span class="status-pill status-pill--shipped">発送済み</span>
+        </div>
+        <div class="order-card__body">
+          <div class="order-card__info">
+            <dl class="order-card__info-row"><dt>種別</dt><dd>模造紙</dd></dl>
+            <dl class="order-card__info-row"><dt>発注日</dt><dd>2026/01/28</dd></dl>
+            <dl class="order-card__info-row"><dt>到着希望</dt><dd>2026/03/17 午前中</dd></dl>
+            <dl class="order-card__info-row"><dt>宛先</dt><dd>NEC 研修施設</dd></dl>
+            <dl class="order-card__info-row"><dt>人数</dt><dd>25名 / 5チーム</dd></dl>
+            <dl class="order-card__info-row"><dt>発送日</dt><dd>2026/03/15</dd></dl>
+            <div class="progress-mini">
+              <div class="progress-mini__bar"><div class="progress-mini__fill" style="width:100%; background:#2e7d32;"></div></div>
+              <span class="progress-mini__label">受取チェック待ち</span>
+            </div>
+          </div>
+          <div class="order-card__actions">
+            <a href="view-form.html" class="action-link--azlogi">アズロジ側フォーム</a>
+            <a href="mentor-check.html" class="action-link--mentor">メンターチェック</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 案件6: 発送済み -->
+      <div class="order-card" data-status="shipped">
+        <div class="order-card__top">
+          <span class="order-card__id">00008_KDDI_AIA実践2Days 3/25-26</span>
+          <span class="status-pill status-pill--shipped">発送済み</span>
+        </div>
+        <div class="order-card__body">
+          <div class="order-card__info">
+            <dl class="order-card__info-row"><dt>種別</dt><dd>AIA</dd></dl>
+            <dl class="order-card__info-row"><dt>発注日</dt><dd>2026/02/03</dd></dl>
+            <dl class="order-card__info-row"><dt>到着希望</dt><dd>2026/03/24 午前中</dd></dl>
+            <dl class="order-card__info-row"><dt>宛先</dt><dd>KDDI 飯田橋オフィス</dd></dl>
+            <dl class="order-card__info-row"><dt>人数</dt><dd>18名 / 6チーム</dd></dl>
+            <dl class="order-card__info-row"><dt>発送日</dt><dd>2026/03/22</dd></dl>
+            <div class="progress-mini">
+              <div class="progress-mini__bar"><div class="progress-mini__fill" style="width:60%; background:#1976d2;"></div></div>
+              <span class="progress-mini__label">受取チェック 6/10</span>
+            </div>
+          </div>
+          <div class="order-card__actions">
+            <a href="mentor-check.html" class="action-link--mentor">メンターチェック</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 案件7: 完了 -->
+      <div class="order-card" data-status="done" style="opacity:0.7;">
+        <div class="order-card__top">
+          <span class="order-card__id">00009_楽天BI分析1Day 4/2</span>
+          <span class="status-pill status-pill--done">完了</span>
+        </div>
+        <div class="order-card__body">
+          <div class="order-card__info">
+            <dl class="order-card__info-row"><dt>種別</dt><dd>BI</dd></dl>
+            <dl class="order-card__info-row"><dt>発注日</dt><dd>2026/01/20</dd></dl>
+            <dl class="order-card__info-row"><dt>宛先</dt><dd>楽天グループ 二子玉川オフィス</dd></dl>
+            <dl class="order-card__info-row"><dt>人数</dt><dd>16名 / 4チーム</dd></dl>
+            <dl class="order-card__info-row"><dt>発送日</dt><dd>2026/03/31</dd></dl>
+            <dl class="order-card__info-row"><dt>返送確認</dt><dd style="color:#2e7d32;">全品返送済み</dd></dl>
+          </div>
+          <div class="order-card__actions">
+            <a href="view-form.html" class="action-link--azlogi">履歴を閲覧</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 案件8: 完了 -->
+      <div class="order-card" data-status="done" style="opacity:0.7;">
+        <div class="order-card__top">
+          <span class="order-card__id">00010_三菱UFJBI応用2Days 4/8-9</span>
+          <span class="status-pill status-pill--done">完了</span>
+        </div>
+        <div class="order-card__body">
+          <div class="order-card__info">
+            <dl class="order-card__info-row"><dt>種別</dt><dd>BI</dd></dl>
+            <dl class="order-card__info-row"><dt>発注日</dt><dd>2026/01/25</dd></dl>
+            <dl class="order-card__info-row"><dt>宛先</dt><dd>三菱UFJ銀行 研修センター</dd></dl>
+            <dl class="order-card__info-row"><dt>人数</dt><dd>24名 / 6チーム</dd></dl>
+            <dl class="order-card__info-row"><dt>発送日</dt><dd>2026/04/06</dd></dl>
+            <dl class="order-card__info-row"><dt>返送確認</dt><dd style="color:#2e7d32;">全品返送済み</dd></dl>
+          </div>
+          <div class="order-card__actions">
+            <a href="view-form.html" class="action-link--azlogi">履歴を閲覧</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    備品発送ダッシュボード &copy; 2026
+  </footer>
+
+  <script>
+  (function () {
+    var filterBtns = document.querySelectorAll('.filter-btn');
+    var orderCards = document.querySelectorAll('.order-card');
+
+    filterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        filterBtns.forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+
+        var filter = btn.dataset.filter;
+        orderCards.forEach(function (card) {
+          if (filter === 'all' || card.dataset.status === filter) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+  })();
+  </script>
+
+</body>
+</html>
