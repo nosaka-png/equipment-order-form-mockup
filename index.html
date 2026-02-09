@@ -13,8 +13,96 @@
     .calc-inputs .form-group { min-width:160px; }
     .auto-badge { display:inline-block; padding:1px 8px; border-radius:3px; font-size:0.72rem; font-weight:600; background:#e3f2fd; color:#1565c0; margin-left:6px; vertical-align:middle; }
     .option-badge { display:inline-block; padding:1px 8px; border-radius:3px; font-size:0.72rem; font-weight:600; background:#fff3e0; color:#e65100; margin-left:6px; vertical-align:middle; }
+    .manual-badge { display:inline-block; padding:1px 8px; border-radius:3px; font-size:0.72rem; font-weight:600; background:#f3e5f5; color:#7b1fa2; margin-left:6px; vertical-align:middle; }
     #equipmentSection { display:none; }
     #equipmentSection.is-visible { display:block; }
+
+    /* 備品追加ボタン */
+    .btn--add-item {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:7px 18px;
+      background:#f3e5f5; color:#7b1fa2;
+      border:1px solid #ce93d8; border-radius:4px;
+      font-size:0.85rem; font-weight:600;
+      cursor:pointer; transition:background 0.15s;
+    }
+    .btn--add-item:hover { background:#e1bee7; }
+
+    /* 備品選択モーダル */
+    .item-picker-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.45); z-index:3000;
+      justify-content:center; align-items:center;
+    }
+    .item-picker-overlay.is-visible { display:flex; }
+    .item-picker {
+      background:#fff; border-radius:8px;
+      width:720px; max-width:92vw; max-height:85vh;
+      display:flex; flex-direction:column;
+      box-shadow:0 8px 32px rgba(0,0,0,0.2);
+    }
+    .item-picker__header {
+      padding:18px 24px;
+      border-bottom:1px solid #e0e0e0;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .item-picker__header h3 { margin:0; font-size:1.05rem; }
+    .item-picker__close {
+      background:none; border:none; font-size:1.6rem;
+      cursor:pointer; color:#999; line-height:1;
+    }
+    .item-picker__close:hover { color:#333; }
+    .item-picker__search {
+      padding:12px 24px;
+      border-bottom:1px solid #e0e0e0;
+    }
+    .item-picker__search input {
+      width:100%; padding:8px 12px;
+      border:1px solid #ccc; border-radius:4px;
+      font-size:0.9rem; font-family:inherit;
+    }
+    .item-picker__search input:focus { outline:none; border-color:#7b1fa2; box-shadow:0 0 0 2px rgba(123,31,162,0.15); }
+    .item-picker__body {
+      flex:1; overflow-y:auto; padding:0;
+    }
+    .item-picker__category {
+      padding:10px 24px 4px;
+      font-size:0.8rem; font-weight:700;
+      color:#999; text-transform:uppercase;
+      background:#fafafa;
+      border-top:1px solid #f0f0f0;
+      position:sticky; top:0; z-index:1;
+    }
+    .item-picker__row {
+      display:flex; align-items:center; gap:12px;
+      padding:10px 24px;
+      border-bottom:1px solid #f5f5f5;
+      cursor:pointer; transition:background 0.1s;
+    }
+    .item-picker__row:hover { background:#fce4ec20; }
+    .item-picker__row.is-checked { background:#f3e5f5; }
+    .item-picker__row.is-already { opacity:0.45; cursor:default; }
+    .item-picker__row input[type="checkbox"] { width:16px; height:16px; flex-shrink:0; }
+    .item-picker__row .ip-name { font-size:0.9rem; font-weight:500; flex:1; }
+    .item-picker__row .ip-cat { font-size:0.78rem; color:#999; width:90px; text-align:right; }
+    .item-picker__row .ip-stock { font-size:0.78rem; color:#999; width:60px; text-align:right; }
+    .item-picker__row .ip-qty {
+      width:70px;
+    }
+    .item-picker__row .ip-qty input {
+      width:100%; padding:4px 6px;
+      border:1px solid #ccc; border-radius:3px;
+      font-size:0.85rem; text-align:right;
+      font-family:inherit;
+    }
+    .item-picker__row .ip-already { font-size:0.75rem; color:#999; font-style:italic; }
+    .item-picker__footer {
+      padding:14px 24px;
+      border-top:1px solid #e0e0e0;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .item-picker__footer .ip-count { font-size:0.85rem; color:#777; }
+    .item-picker__footer .ip-count strong { color:#7b1fa2; }
 
     /* メンター オートコンプリート */
     .mentor-search-wrap { position: relative; }
@@ -220,9 +308,12 @@
           </div>
         </div>
 
-        <p style="font-size:0.85rem; color:#777; margin-bottom:12px;">
-          研修種別に基づく必要備品が自動表示されます。数量は人数・チーム数から自動算出されます。
-        </p>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <p style="font-size:0.85rem; color:#777; margin:0;">
+            研修種別に基づく必要備品が自動表示されます。数量は人数・チーム数から自動算出されます。
+          </p>
+          <button type="button" class="btn--add-item" id="btnAddItem">＋ 一覧から追加</button>
+        </div>
         <div class="table-wrap">
           <table class="data-table" id="itemTable">
             <thead>
@@ -286,6 +377,29 @@
       <div class="modal__actions">
         <button class="btn btn--cancel" id="btnModalCancel">キャンセル</button>
         <button class="btn btn--success" id="btnModalConfirm">確定・Slack共有</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 備品選択ポップアップ -->
+  <div class="item-picker-overlay" id="itemPickerOverlay">
+    <div class="item-picker">
+      <div class="item-picker__header">
+        <h3>備品一覧から追加（イレギュラー対応）</h3>
+        <button class="item-picker__close" id="itemPickerClose">&times;</button>
+      </div>
+      <div class="item-picker__search">
+        <input type="text" placeholder="品目名・カテゴリで検索..." id="itemPickerSearch" autocomplete="off">
+      </div>
+      <div class="item-picker__body" id="itemPickerBody">
+        <!-- JSで動的生成 -->
+      </div>
+      <div class="item-picker__footer">
+        <span class="ip-count" id="itemPickerCount">選択: <strong>0</strong> 品目</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn--cancel" id="itemPickerCancel">キャンセル</button>
+          <button class="btn btn--primary" id="itemPickerConfirm" style="background:#7b1fa2; border-color:#7b1fa2;">追加する</button>
+        </div>
       </div>
     </div>
   </div>
@@ -391,6 +505,86 @@
         { name: 'レンタルPC（Windows）',   category: 'PC機器', perPerson:1, stock:20 }
       ]
     };
+
+    // ==============================
+    // 全備品マスターDB（全種別・全オプション + 汎用備品）
+    // ==============================
+    var allEquipmentMaster = [
+      // PC機器
+      { name: 'ノートPC',                    category: 'PC機器',     stock: 25 },
+      { name: 'ノートPC（GPU搭載）',         category: 'PC機器',     stock: 10 },
+      { name: 'レンタルPC（Windows）',        category: 'PC機器',     stock: 20 },
+      { name: 'デスクトップPC',               category: 'PC機器',     stock: 5 },
+      { name: 'タブレット（iPad）',           category: 'PC機器',     stock: 12 },
+      // PC周辺機器
+      { name: 'マウス',                       category: 'PC周辺機器', stock: 30 },
+      { name: 'ワイヤレスキーボード',         category: 'PC周辺機器', stock: 15 },
+      { name: 'モニター（24インチ）',         category: 'PC周辺機器', stock: 8 },
+      { name: 'モニター（27インチ）',         category: 'PC周辺機器', stock: 4 },
+      { name: 'USBハブ（4ポート）',           category: 'PC周辺機器', stock: 8 },
+      { name: 'Webカメラ',                    category: 'PC周辺機器', stock: 10 },
+      { name: 'ヘッドセット',                 category: 'PC周辺機器', stock: 15 },
+      // ケーブル
+      { name: 'HDMIケーブル',                 category: 'ケーブル',   stock: 15 },
+      { name: 'HDMIケーブル（5m）',           category: 'ケーブル',   stock: 5 },
+      { name: 'LANケーブル（3m）',            category: 'ケーブル',   stock: 20 },
+      { name: 'LANケーブル（10m）',           category: 'ケーブル',   stock: 8 },
+      { name: 'USB-Cケーブル',                category: 'ケーブル',   stock: 18 },
+      { name: 'VGAケーブル',                  category: 'ケーブル',   stock: 6 },
+      // 電源
+      { name: '電源タップ（6口）',            category: '電源',       stock: 12 },
+      { name: '3口アース付き延長コード（5m）',category: '電源',       stock: 8 },
+      { name: '電源タップ（10口）',           category: '電源',       stock: 5 },
+      { name: 'ポータブル電源',               category: '電源',       stock: 3 },
+      // 映像機器
+      { name: 'プロジェクター',               category: '映像機器',   stock: 3 },
+      { name: 'プロジェクタースクリーン',     category: '映像機器',   stock: 3 },
+      { name: '大型モニター（55インチ）',     category: '映像機器',   stock: 2 },
+      { name: 'モニタースタンド',             category: '映像機器',   stock: 4 },
+      // 音響機器
+      { name: 'ワイヤレススピーカー',         category: '音響機器',   stock: 4 },
+      { name: 'ワイヤレスマイク',             category: '音響機器',   stock: 6 },
+      { name: 'ピンマイク',                   category: '音響機器',   stock: 4 },
+      { name: 'ミキサー',                     category: '音響機器',   stock: 2 },
+      // 文具
+      { name: 'ホワイトボードマーカーセット', category: '文具',       stock: 20 },
+      { name: 'マーカー（太字8色セット）',    category: '文具',       stock: 15 },
+      { name: '付箋（大）',                   category: '文具',       stock: 50 },
+      { name: '付箋（小）',                   category: '文具',       stock: 50 },
+      { name: 'マスキングテープ',             category: '文具',       stock: 20 },
+      { name: 'ドットシール',                 category: '文具',       stock: 60 },
+      { name: 'ボールペン（黒）',             category: '文具',       stock: 100 },
+      { name: '名札ホルダー',                 category: '文具',       stock: 50 },
+      { name: 'クリアファイル（A4）',         category: '文具',       stock: 80 },
+      { name: 'バインダー',                   category: '文具',       stock: 30 },
+      // 紙類
+      { name: '模造紙（白）',                 category: '紙類',       stock: 100 },
+      { name: '模造紙（方眼）',               category: '紙類',       stock: 40 },
+      { name: 'コピー用紙（A4 500枚）',       category: '紙類',       stock: 20 },
+      { name: 'フリップチャート用紙',         category: '紙類',       stock: 15 },
+      // メディア
+      { name: 'USBメモリ（32GB）',            category: 'メディア',   stock: 40 },
+      { name: 'USBメモリ（64GB）',            category: 'メディア',   stock: 20 },
+      { name: 'SDカード（32GB）',             category: 'メディア',   stock: 10 },
+      // 什器
+      { name: 'ホワイトボード（自立型）',     category: '什器',       stock: 6 },
+      { name: 'フリップチャートスタンド',     category: '什器',       stock: 4 },
+      { name: 'パーテーション',               category: '什器',       stock: 8 },
+      { name: '折りたたみ机',                 category: '什器',       stock: 10 },
+      { name: '折りたたみ椅子',               category: '什器',       stock: 30 },
+      // その他
+      { name: 'Wi-Fiルーター（モバイル）',    category: 'ネットワーク', stock: 5 },
+      { name: 'LANスイッチングハブ（8ポート）',category: 'ネットワーク', stock: 4 },
+      { name: 'タイマー（デジタル大型）',     category: 'その他',     stock: 6 },
+      { name: 'レーザーポインター',           category: 'その他',     stock: 8 },
+      { name: 'ネームプレート',               category: 'その他',     stock: 40 },
+      { name: 'アルコール消毒スプレー',       category: 'その他',     stock: 20 },
+      { name: '養生テープ',                   category: 'その他',     stock: 15 },
+      { name: 'ガムテープ',                   category: 'その他',     stock: 15 }
+    ];
+
+    // 手動追加された品目リスト
+    var manualItems = [];
 
     // ==============================
     // DOM要素
@@ -526,12 +720,226 @@
         });
       });
 
+      // 手動追加の備品
+      manualItems.forEach(function (item, idx) {
+        html += '<tr style="background:#f3e5f5;">';
+        html += '<td>' + item.name + '</td>';
+        html += '<td>' + item.category + '</td>';
+        html += '<td>' + type + '</td>';
+        html += '<td>手動<span class="manual-badge">追加</span></td>';
+        html += '<td style="text-align:right;">' + item.stock + '</td>';
+        var stockClass = item.stock <= 0 ? 'stock-out' : (item.stock < item.qty ? 'stock-low' : 'stock-ok');
+        var stockLabel = item.stock <= 0 ? '欠品' : (item.stock < item.qty ? '残少' : '十分');
+        html += '<td><span class="' + stockClass + '">' + stockLabel + '</span></td>';
+        html += '<td style="text-align:right; font-weight:600; white-space:nowrap;">' +
+          '<input type="number" class="manual-qty-input" data-manual-idx="' + idx + '" value="' + item.qty + '" min="1" ' +
+          'style="width:60px; padding:3px 6px; border:1px solid #ce93d8; border-radius:3px; text-align:right; font-size:0.85rem; font-family:inherit; margin-right:6px;">' +
+          '<button type="button" class="manual-remove-btn" data-manual-idx="' + idx + '" ' +
+          'style="background:none; border:none; color:#c62828; font-size:1.1rem; cursor:pointer; vertical-align:middle;" title="削除">&times;</button>' +
+          '</td>';
+        html += '</tr>';
+      });
+
       if (html === '') {
         html = '<tr><td colspan="7" style="text-align:center; color:#999; padding:24px;">研修を選択してください</td></tr>';
       }
 
       itemTableBody.innerHTML = html;
+
+      // 手動追加品目の数量変更イベント
+      itemTableBody.querySelectorAll('.manual-qty-input').forEach(function (input) {
+        input.addEventListener('change', function () {
+          var idx = parseInt(this.dataset.manualIdx);
+          var val = parseInt(this.value) || 1;
+          if (val < 1) val = 1;
+          manualItems[idx].qty = val;
+          this.value = val;
+        });
+      });
+
+      // 手動追加品目の削除イベント
+      itemTableBody.querySelectorAll('.manual-remove-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var idx = parseInt(this.dataset.manualIdx);
+          manualItems.splice(idx, 1);
+          renderTable();
+        });
+      });
     }
+
+    // ==============================
+    // 備品選択ポップアップ
+    // ==============================
+    var btnAddItem = document.getElementById('btnAddItem');
+    var itemPickerOverlay = document.getElementById('itemPickerOverlay');
+    var itemPickerClose = document.getElementById('itemPickerClose');
+    var itemPickerSearch = document.getElementById('itemPickerSearch');
+    var itemPickerBody = document.getElementById('itemPickerBody');
+    var itemPickerCount = document.getElementById('itemPickerCount');
+    var itemPickerCancel = document.getElementById('itemPickerCancel');
+    var itemPickerConfirm = document.getElementById('itemPickerConfirm');
+
+    var pickerSelections = {}; // { name: qty }
+
+    function getAlreadyInTable() {
+      // テーブルに既にある品目名を収集
+      var existing = {};
+      if (currentTraining) {
+        var type = currentTraining.type;
+        (equipmentByType[type] || []).forEach(function (item) {
+          existing[item.name] = true;
+        });
+      }
+      // オプション備品
+      document.querySelectorAll('.option-check:checked').forEach(function (cb) {
+        var optItems = optionEquipment[cb.value] || [];
+        optItems.forEach(function (item) { existing[item.name] = true; });
+      });
+      // 手動追加済み
+      manualItems.forEach(function (item) { existing[item.name] = true; });
+      return existing;
+    }
+
+    function renderItemPicker(filter) {
+      var existing = getAlreadyInTable();
+      var query = (filter || '').trim().toLowerCase();
+
+      // カテゴリ別にグループ化
+      var categories = {};
+      allEquipmentMaster.forEach(function (item) {
+        if (query && item.name.toLowerCase().indexOf(query) === -1 &&
+            item.category.toLowerCase().indexOf(query) === -1) return;
+        if (!categories[item.category]) categories[item.category] = [];
+        categories[item.category].push(item);
+      });
+
+      var html = '';
+      var catKeys = Object.keys(categories).sort();
+      catKeys.forEach(function (cat) {
+        html += '<div class="item-picker__category">' + cat + '</div>';
+        categories[cat].forEach(function (item) {
+          var isAlready = existing[item.name];
+          var isChecked = pickerSelections[item.name] !== undefined;
+          html += '<div class="item-picker__row' +
+            (isChecked ? ' is-checked' : '') +
+            (isAlready ? ' is-already' : '') +
+            '" data-item-name="' + item.name + '">';
+          if (isAlready) {
+            html += '<input type="checkbox" disabled checked>';
+            html += '<span class="ip-name">' + item.name + '</span>';
+            html += '<span class="ip-already">追加済み</span>';
+          } else {
+            html += '<input type="checkbox"' + (isChecked ? ' checked' : '') + '>';
+            html += '<span class="ip-name">' + item.name + '</span>';
+            html += '<span class="ip-cat">' + item.category + '</span>';
+            html += '<span class="ip-stock">在庫 ' + item.stock + '</span>';
+            html += '<span class="ip-qty"><input type="number" min="1" value="' +
+              (pickerSelections[item.name] || 1) + '" placeholder="数量"' +
+              (isChecked ? '' : ' disabled') + '></span>';
+          }
+          html += '</div>';
+        });
+      });
+
+      if (html === '') {
+        html = '<div style="padding:30px; text-align:center; color:#999;">該当する備品が見つかりません</div>';
+      }
+
+      itemPickerBody.innerHTML = html;
+      updatePickerCount();
+    }
+
+    function updatePickerCount() {
+      var count = Object.keys(pickerSelections).length;
+      itemPickerCount.innerHTML = '選択: <strong>' + count + '</strong> 品目';
+    }
+
+    // ポップアップを開く
+    btnAddItem.addEventListener('click', function () {
+      pickerSelections = {};
+      itemPickerSearch.value = '';
+      renderItemPicker('');
+      itemPickerOverlay.classList.add('is-visible');
+      setTimeout(function () { itemPickerSearch.focus(); }, 100);
+    });
+
+    // 検索
+    itemPickerSearch.addEventListener('input', function () {
+      renderItemPicker(this.value);
+    });
+
+    // 行クリックでチェック切り替え
+    itemPickerBody.addEventListener('click', function (e) {
+      var row = e.target.closest('.item-picker__row');
+      if (!row || row.classList.contains('is-already')) return;
+
+      // 数量入力欄クリック時はトグルしない
+      if (e.target.closest('.ip-qty')) return;
+
+      var name = row.dataset.itemName;
+      var cb = row.querySelector('input[type="checkbox"]');
+      var qtyInput = row.querySelector('.ip-qty input');
+
+      if (pickerSelections[name] !== undefined) {
+        // アンチェック
+        delete pickerSelections[name];
+        cb.checked = false;
+        row.classList.remove('is-checked');
+        if (qtyInput) qtyInput.disabled = true;
+      } else {
+        // チェック
+        pickerSelections[name] = parseInt(qtyInput.value) || 1;
+        cb.checked = true;
+        row.classList.add('is-checked');
+        if (qtyInput) qtyInput.disabled = false;
+      }
+      updatePickerCount();
+    });
+
+    // 数量変更
+    itemPickerBody.addEventListener('change', function (e) {
+      if (e.target.closest('.ip-qty')) {
+        var row = e.target.closest('.item-picker__row');
+        var name = row.dataset.itemName;
+        if (pickerSelections[name] !== undefined) {
+          pickerSelections[name] = parseInt(e.target.value) || 1;
+        }
+      }
+    });
+
+    // ポップアップ閉じる
+    function closeItemPicker() {
+      itemPickerOverlay.classList.remove('is-visible');
+    }
+    itemPickerClose.addEventListener('click', closeItemPicker);
+    itemPickerCancel.addEventListener('click', closeItemPicker);
+    itemPickerOverlay.addEventListener('click', function (e) {
+      if (e.target === itemPickerOverlay) closeItemPicker();
+    });
+
+    // 追加確定
+    itemPickerConfirm.addEventListener('click', function () {
+      var names = Object.keys(pickerSelections);
+      if (names.length === 0) {
+        closeItemPicker();
+        return;
+      }
+
+      names.forEach(function (name) {
+        var master = allEquipmentMaster.find(function (m) { return m.name === name; });
+        if (master) {
+          manualItems.push({
+            name: master.name,
+            category: master.category,
+            stock: master.stock,
+            qty: pickerSelections[name]
+          });
+        }
+      });
+
+      closeItemPicker();
+      renderTable();
+    });
 
     // ==============================
     // メンターDB（ダミー）
@@ -683,18 +1091,24 @@
         return;
       }
 
-      // 品目収集
-      var rows = itemTableBody.querySelectorAll('tr');
+      // 品目収集（自動＋オプション）
+      var type = currentTraining.type;
       var selectedItems = [];
-      rows.forEach(function (row) {
-        var cells = row.querySelectorAll('td');
-        if (cells.length >= 7) {
-          var name = cells[0].textContent;
-          var qty = cells[6].textContent.trim();
-          if (qty !== '-' && qty !== '0') {
-            selectedItems.push(name + ' × ' + qty);
-          }
-        }
+      var autoItems = equipmentByType[type] || [];
+      autoItems.forEach(function (item) {
+        var qty = (item.perPerson || 0) * people + (item.perTeam || 0) * teams + (item.fixed || 0);
+        if (qty > 0) selectedItems.push(item.name + ' × ' + qty + '（基本）');
+      });
+      document.querySelectorAll('.option-check:checked').forEach(function (cb) {
+        var optItems = optionEquipment[cb.value] || [];
+        optItems.forEach(function (item) {
+          var qty = item.perPerson ? item.perPerson * people : (item.fixed || 0);
+          if (qty > 0) selectedItems.push(item.name + ' × ' + qty + '（' + cb.value + '）');
+        });
+      });
+      // 手動追加品目
+      manualItems.forEach(function (item) {
+        selectedItems.push(item.name + ' × ' + item.qty + '（手動追加）');
       });
 
       if (selectedItems.length === 0) {
