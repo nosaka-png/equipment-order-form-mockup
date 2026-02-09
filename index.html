@@ -11,9 +11,32 @@
     .option-checks input[type="checkbox"] { width:16px; height:16px; }
     .calc-inputs { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; margin-bottom:16px; }
     .calc-inputs .form-group { min-width:160px; }
+    .common-badge { display:inline-block; padding:1px 8px; border-radius:3px; font-size:0.72rem; font-weight:600; background:#e8eaf6; color:#283593; margin-left:6px; vertical-align:middle; }
     .auto-badge { display:inline-block; padding:1px 8px; border-radius:3px; font-size:0.72rem; font-weight:600; background:#e3f2fd; color:#1565c0; margin-left:6px; vertical-align:middle; }
+    .venue-badge { display:inline-block; padding:1px 8px; border-radius:3px; font-size:0.72rem; font-weight:600; background:#fff8e1; color:#f57f17; margin-left:6px; vertical-align:middle; }
     .option-badge { display:inline-block; padding:1px 8px; border-radius:3px; font-size:0.72rem; font-weight:600; background:#fff3e0; color:#e65100; margin-left:6px; vertical-align:middle; }
     .manual-badge { display:inline-block; padding:1px 8px; border-radius:3px; font-size:0.72rem; font-weight:600; background:#f3e5f5; color:#7b1fa2; margin-left:6px; vertical-align:middle; }
+
+    /* 会場環境チェックリスト */
+    .venue-checklist {
+      background:#fffde7; border:1px solid #fff9c4; border-radius:6px;
+      padding:16px 20px; margin-bottom:16px;
+    }
+    .venue-checklist__title {
+      font-size:0.9rem; font-weight:700; color:#f57f17;
+      margin-bottom:10px;
+    }
+
+    /* テーブルセクション区切り */
+    .table-section-row td {
+      background:#f5f5f5; font-weight:700; font-size:0.8rem;
+      color:#555; padding:6px 12px !important;
+      border-bottom:2px solid #e0e0e0;
+    }
+    .table-section-row.section-common td { background:#e8eaf6; color:#283593; }
+    .table-section-row.section-type td { background:#e3f2fd; color:#1565c0; }
+    .table-section-row.section-venue td { background:#fff8e1; color:#f57f17; }
+    .table-section-row.section-manual td { background:#f3e5f5; color:#7b1fa2; }
     #equipmentSection { display:none; }
     #equipmentSection.is-visible { display:block; }
 
@@ -297,21 +320,19 @@
           </div>
         </div>
 
-        <!-- オプション -->
-        <div class="form-group" style="margin-bottom:16px;">
-          <label class="form-label">オプション選択</label>
-          <div class="option-checks">
-            <label><input type="checkbox" value="プロジェクタ" class="option-check"> プロジェクタ</label>
-            <label><input type="checkbox" value="音響" class="option-check"> 音響</label>
-            <label><input type="checkbox" value="3口アース" class="option-check"> 3口アース</label>
-            <label><input type="checkbox" value="PCレンタル" class="option-check"> PCレンタル</label>
+        <!-- オプション選択 -->
+        <div class="venue-checklist">
+          <div class="venue-checklist__title">オプション選択</div>
+          <div class="option-checks" id="venueGrid">
+            <label><input type="checkbox" class="venue-check" value="プロジェクタ"> プロジェクタ</label>
+            <label><input type="checkbox" class="venue-check" value="音響"> 音響</label>
+            <label><input type="checkbox" class="venue-check" value="電源ドラム"> 電源ドラム</label>
+            <label><input type="checkbox" class="venue-check" value="3口アース"> 3口アース</label>
+            <label><input type="checkbox" class="venue-check" value="PCレンタル"> PCレンタル</label>
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <p style="font-size:0.85rem; color:#777; margin:0;">
-            研修種別に基づく必要備品が自動表示されます。数量は人数・チーム数から自動算出されます。
-          </p>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
           <button type="button" class="btn--add-item" id="btnAddItem">＋ 一覧から追加</button>
         </div>
         <div class="table-wrap">
@@ -320,8 +341,6 @@
               <tr>
                 <th>品目名</th>
                 <th>カテゴリ</th>
-                <th>研修種別</th>
-                <th>区分</th>
                 <th style="text-align:right;">現在庫数</th>
                 <th>在庫状況</th>
                 <th style="width:100px; text-align:right;">必要数量</th>
@@ -432,38 +451,42 @@
     ];
 
     // ==============================
-    // 研修種別ごとの必要備品
-    //   perPerson: 人数あたり, perTeam: チーム数あたり, fixed: 固定数
+    // 第1層：共通備品（研修種別に関係なく必ず必要）
+    // ==============================
+    var commonEquipment = [
+      { name: 'ホワイトボードマーカーセット', category: '文具',       perPerson:0, perTeam:1, fixed:0, stock:20 },
+      { name: '付箋（大）',              category: '文具',       perPerson:1, perTeam:0, fixed:0, stock:50 },
+      { name: 'ボールペン（黒）',        category: '文具',       perPerson:1, perTeam:0, fixed:0, stock:100 },
+      { name: '名札ホルダー',            category: '文具',       perPerson:1, perTeam:0, fixed:0, stock:50 },
+      { name: 'クリアファイル（A4）',    category: '文具',       perPerson:1, perTeam:0, fixed:0, stock:80 },
+      { name: '電源タップ（6口）',       category: '電源',       perPerson:0, perTeam:1, fixed:0, stock:12 }
+    ];
+
+    // ==============================
+    // 第2層：研修種別固有備品（その種別でのみ必要）
     // ==============================
     var equipmentByType = {
       'DX': [
         { name: 'ノートPC',               category: 'PC機器',     perPerson:1, perTeam:0, fixed:0, stock:25 },
         { name: 'マウス',                  category: 'PC周辺機器', perPerson:1, perTeam:0, fixed:0, stock:30 },
         { name: 'HDMIケーブル',            category: 'ケーブル',   perPerson:0, perTeam:1, fixed:0, stock:15 },
-        { name: 'モニター（24インチ）',    category: 'PC周辺機器', perPerson:0, perTeam:1, fixed:0, stock:8  },
-        { name: 'ホワイトボードマーカーセット', category: '文具', perPerson:0, perTeam:1, fixed:0, stock:20 },
-        { name: '付箋（大）',              category: '文具',       perPerson:1, perTeam:0, fixed:0, stock:50 },
-        { name: '電源タップ（6口）',       category: '電源',       perPerson:0, perTeam:1, fixed:0, stock:12 }
+        { name: 'モニター（24インチ）',    category: 'PC周辺機器', perPerson:0, perTeam:1, fixed:0, stock:8  }
       ],
       'AI': [
         { name: 'ノートPC（GPU搭載）',    category: 'PC機器',     perPerson:1, perTeam:0, fixed:0, stock:10 },
         { name: 'マウス',                  category: 'PC周辺機器', perPerson:1, perTeam:0, fixed:0, stock:30 },
         { name: 'LANケーブル（3m）',       category: 'ケーブル',   perPerson:1, perTeam:0, fixed:0, stock:20 },
-        { name: 'HDMIケーブル',            category: 'ケーブル',   perPerson:0, perTeam:1, fixed:0, stock:15 },
-        { name: 'ホワイトボードマーカーセット', category: '文具', perPerson:0, perTeam:1, fixed:0, stock:20 },
-        { name: '電源タップ（6口）',       category: '電源',       perPerson:0, perTeam:1, fixed:0, stock:12 }
+        { name: 'HDMIケーブル',            category: 'ケーブル',   perPerson:0, perTeam:1, fixed:0, stock:15 }
       ],
       'CD': [
         { name: 'ノートPC',               category: 'PC機器',     perPerson:1, perTeam:0, fixed:0, stock:25 },
         { name: 'マウス',                  category: 'PC周辺機器', perPerson:1, perTeam:0, fixed:0, stock:30 },
         { name: 'USBメモリ（32GB）',       category: 'メディア',   perPerson:1, perTeam:0, fixed:0, stock:40 },
-        { name: 'HDMIケーブル',            category: 'ケーブル',   perPerson:0, perTeam:1, fixed:0, stock:15 },
-        { name: '電源タップ（6口）',       category: '電源',       perPerson:0, perTeam:1, fixed:0, stock:12 }
+        { name: 'HDMIケーブル',            category: 'ケーブル',   perPerson:0, perTeam:1, fixed:0, stock:15 }
       ],
       '模造紙': [
         { name: '模造紙（白）',            category: '紙類',       perPerson:0, perTeam:3, fixed:0, stock:100 },
         { name: 'マーカー（太字8色セット）', category: '文具',     perPerson:0, perTeam:1, fixed:0, stock:15 },
-        { name: '付箋（大）',              category: '文具',       perPerson:1, perTeam:0, fixed:0, stock:50 },
         { name: '付箋（小）',              category: '文具',       perPerson:1, perTeam:0, fixed:0, stock:50 },
         { name: 'マスキングテープ',        category: '文具',       perPerson:0, perTeam:1, fixed:0, stock:20 },
         { name: 'ドットシール',            category: '文具',       perPerson:1, perTeam:0, fixed:0, stock:60 }
@@ -473,20 +496,18 @@
         { name: 'マウス',                  category: 'PC周辺機器', perPerson:1, perTeam:0, fixed:0, stock:30 },
         { name: 'USBハブ（4ポート）',      category: 'PC周辺機器', perPerson:0, perTeam:1, fixed:0, stock:8  },
         { name: 'HDMIケーブル',            category: 'ケーブル',   perPerson:0, perTeam:1, fixed:0, stock:15 },
-        { name: 'LANケーブル（3m）',       category: 'ケーブル',   perPerson:1, perTeam:0, fixed:0, stock:20 },
-        { name: '電源タップ（6口）',       category: '電源',       perPerson:0, perTeam:1, fixed:0, stock:12 }
+        { name: 'LANケーブル（3m）',       category: 'ケーブル',   perPerson:1, perTeam:0, fixed:0, stock:20 }
       ],
       'BI': [
         { name: 'ノートPC',               category: 'PC機器',     perPerson:1, perTeam:0, fixed:0, stock:25 },
         { name: 'マウス',                  category: 'PC周辺機器', perPerson:1, perTeam:0, fixed:0, stock:30 },
         { name: 'HDMIケーブル',            category: 'ケーブル',   perPerson:0, perTeam:1, fixed:0, stock:15 },
-        { name: 'モニター（24インチ）',    category: 'PC周辺機器', perPerson:0, perTeam:1, fixed:0, stock:8  },
-        { name: '電源タップ（6口）',       category: '電源',       perPerson:0, perTeam:1, fixed:0, stock:12 }
+        { name: 'モニター（24インチ）',    category: 'PC周辺機器', perPerson:0, perTeam:1, fixed:0, stock:8  }
       ]
     };
 
     // ==============================
-    // オプション備品
+    // オプション備品（チェック=必要）
     // ==============================
     var optionEquipment = {
       'プロジェクタ': [
@@ -498,8 +519,12 @@
         { name: 'ワイヤレススピーカー',    category: '音響機器', fixed:1, stock:4 },
         { name: 'ワイヤレスマイク',        category: '音響機器', fixed:2, stock:6 }
       ],
+      '電源ドラム': [
+        { name: '電源ドラム（20m）',       category: '電源', fixed:1, stock:4 },
+        { name: '電源タップ（10口）',      category: '電源', fixed:1, stock:5 }
+      ],
       '3口アース': [
-        { name: '3口アース付き延長コード（5m）', category: '電源', fixed:2, stock:8 }
+        { name: '3口アース付き延長コード（5m）', category: '電源', perTeam:1, stock:8 }
       ],
       'PCレンタル': [
         { name: 'レンタルPC（Windows）',   category: 'PC機器', perPerson:1, stock:20 }
@@ -618,6 +643,15 @@
     });
 
     // ==============================
+    // オプションチェック → テーブル再描画
+    // ==============================
+    document.querySelectorAll('.venue-check').forEach(function (cb) {
+      cb.addEventListener('change', function () {
+        renderTable();
+      });
+    });
+
+    // ==============================
     // 研修選択時 → 耐久財セクション表示
     // ==============================
     trainingSelect.addEventListener('change', function () {
@@ -636,15 +670,6 @@
     });
 
     // ==============================
-    // オプション変更時 → テーブル再描画
-    // ==============================
-    document.querySelectorAll('.option-check').forEach(function (cb) {
-      cb.addEventListener('change', function () {
-        renderTable();
-      });
-    });
-
-    // ==============================
     // 数量算出ボタン
     // ==============================
     btnCalc.addEventListener('click', function () {
@@ -660,91 +685,138 @@
     // ==============================
     // テーブル描画
     // ==============================
+    // 数量上書き保存用 { "layer:index": qty }
+    var qtyOverrides = {};
+
+    function calcQty(item, people, teams) {
+      if (people < 1 || teams < 1) return 0;
+      return (item.perPerson || 0) * people + (item.perTeam || 0) * teams + (item.fixed || 0);
+    }
+
+    function qtyInputHtml(key, qty, borderColor) {
+      return '<input type="number" class="qty-editable" data-qty-key="' + key + '" value="' + qty + '" min="0" ' +
+        'style="width:70px; padding:3px 6px; border:1px solid ' + borderColor + '; border-radius:3px; text-align:right; font-size:0.85rem; font-family:inherit;">';
+    }
+
+    function getEffectiveQty(key, autoQty) {
+      return qtyOverrides[key] !== undefined ? qtyOverrides[key] : autoQty;
+    }
+
     function renderTable() {
       if (!currentTraining) return;
       var people = parseInt(numPeople.value) || 0;
       var teams = parseInt(numTeams.value) || 0;
       var type = currentTraining.type;
-      var items = equipmentByType[type] || [];
-
-      // 選択中オプション
-      var selectedOptions = [];
-      document.querySelectorAll('.option-check:checked').forEach(function (cb) {
-        selectedOptions.push(cb.value);
-      });
-
       var html = '';
 
-      // 研修種別の基本備品
-      items.forEach(function (item) {
-        var qty = 0;
-        if (people > 0 && teams > 0) {
-          qty = (item.perPerson || 0) * people + (item.perTeam || 0) * teams + (item.fixed || 0);
-        }
-        var stockClass = item.stock <= 0 ? 'stock-out' : (item.stock < qty ? 'stock-low' : 'stock-ok');
-        var stockLabel = item.stock <= 0 ? '欠品' : (item.stock < qty ? '残少' : '十分');
-        html += '<tr>';
+      // ── 全研修共通備品 ──
+      html += '<tr class="table-section-row section-common"><td colspan="5">全研修共通備品</td></tr>';
+      commonEquipment.forEach(function (item, i) {
+        var key = 'common:' + i;
+        var autoQty = calcQty(item, people, teams);
+        var qty = getEffectiveQty(key, autoQty);
+        var stockClass = item.stock <= 0 ? 'stock-out' : (qty > 0 && item.stock < qty ? 'stock-low' : 'stock-ok');
+        var stockLabel = item.stock <= 0 ? '欠品' : (qty > 0 && item.stock < qty ? '残少' : '十分');
+        html += '<tr style="background:#e8eaf6;">';
         html += '<td>' + item.name + '</td>';
         html += '<td>' + item.category + '</td>';
-        html += '<td>' + type + '</td>';
-        html += '<td>基本<span class="auto-badge">自動</span></td>';
         html += '<td style="text-align:right;">' + item.stock + '</td>';
         html += '<td><span class="' + stockClass + '">' + stockLabel + '</span></td>';
-        html += '<td style="text-align:right; font-weight:600;">' + (qty > 0 ? qty : '-') + '</td>';
+        html += '<td style="text-align:right;">' + qtyInputHtml(key, qty, '#9fa8da') + '</td>';
         html += '</tr>';
       });
 
-      // オプション備品
+      // ── 研修種別固有備品 ──
+      var typeItems = equipmentByType[type] || [];
+      html += '<tr class="table-section-row section-type"><td colspan="5">' + type + '研修固有備品</td></tr>';
+      if (typeItems.length === 0) {
+        html += '<tr><td colspan="5" style="text-align:center; color:#999; padding:12px;">この種別に固有の備品はありません</td></tr>';
+      }
+      typeItems.forEach(function (item, i) {
+        var key = 'type:' + i;
+        var autoQty = calcQty(item, people, teams);
+        var qty = getEffectiveQty(key, autoQty);
+        var stockClass = item.stock <= 0 ? 'stock-out' : (qty > 0 && item.stock < qty ? 'stock-low' : 'stock-ok');
+        var stockLabel = item.stock <= 0 ? '欠品' : (qty > 0 && item.stock < qty ? '残少' : '十分');
+        html += '<tr style="background:#e3f2fd;">';
+        html += '<td>' + item.name + '</td>';
+        html += '<td>' + item.category + '</td>';
+        html += '<td style="text-align:right;">' + item.stock + '</td>';
+        html += '<td><span class="' + stockClass + '">' + stockLabel + '</span></td>';
+        html += '<td style="text-align:right;">' + qtyInputHtml(key, qty, '#90caf9') + '</td>';
+        html += '</tr>';
+      });
+
+      // ── オプション備品 ──
+      var selectedOptions = [];
+      document.querySelectorAll('.venue-check:checked').forEach(function (cb) {
+        selectedOptions.push(cb.value);
+      });
+      var optItems = [];
       selectedOptions.forEach(function (optName) {
-        var optItems = optionEquipment[optName] || [];
-        optItems.forEach(function (item) {
-          var qty = 0;
-          if (people > 0 && teams > 0) {
-            if (item.perPerson) {
-              qty = item.perPerson * people;
-            } else {
-              qty = item.fixed || 0;
-            }
-          }
-          var stockClass = item.stock <= 0 ? 'stock-out' : (item.stock < qty ? 'stock-low' : 'stock-ok');
-          var stockLabel = item.stock <= 0 ? '欠品' : (item.stock < qty ? '残少' : '十分');
-          html += '<tr style="background:#fffde7;">';
-          html += '<td>' + item.name + '</td>';
-          html += '<td>' + item.category + '</td>';
-          html += '<td>' + type + '</td>';
-          html += '<td><span class="option-badge">' + optName + '</span></td>';
-          html += '<td style="text-align:right;">' + item.stock + '</td>';
-          html += '<td><span class="' + stockClass + '">' + stockLabel + '</span></td>';
-          html += '<td style="text-align:right; font-weight:600;">' + (qty > 0 ? qty : '-') + '</td>';
-          html += '</tr>';
+        (optionEquipment[optName] || []).forEach(function (item) {
+          optItems.push({ item: item, source: optName });
         });
       });
+      if (optItems.length > 0) {
+        html += '<tr class="table-section-row section-venue"><td colspan="5">オプション</td></tr>';
+        optItems.forEach(function (o, i) {
+          var key = 'opt:' + i;
+          var item = o.item;
+          var autoQty = calcQty(item, people, teams);
+          var qty = getEffectiveQty(key, autoQty);
+          var stockClass = item.stock <= 0 ? 'stock-out' : (qty > 0 && item.stock < qty ? 'stock-low' : 'stock-ok');
+          var stockLabel = item.stock <= 0 ? '欠品' : (qty > 0 && item.stock < qty ? '残少' : '十分');
+          html += '<tr style="background:#fff8e1;">';
+          html += '<td>' + item.name + ' <span class="venue-badge">' + o.source + '</span></td>';
+          html += '<td>' + item.category + '</td>';
+          html += '<td style="text-align:right;">' + item.stock + '</td>';
+          html += '<td><span class="' + stockClass + '">' + stockLabel + '</span></td>';
+          html += '<td style="text-align:right;">' + qtyInputHtml(key, qty, '#fbc02d') + '</td>';
+          html += '</tr>';
+        });
+      }
 
-      // 手動追加の備品
-      manualItems.forEach(function (item, idx) {
-        html += '<tr style="background:#f3e5f5;">';
-        html += '<td>' + item.name + '</td>';
-        html += '<td>' + item.category + '</td>';
-        html += '<td>' + type + '</td>';
-        html += '<td>手動<span class="manual-badge">追加</span></td>';
-        html += '<td style="text-align:right;">' + item.stock + '</td>';
-        var stockClass = item.stock <= 0 ? 'stock-out' : (item.stock < item.qty ? 'stock-low' : 'stock-ok');
-        var stockLabel = item.stock <= 0 ? '欠品' : (item.stock < item.qty ? '残少' : '十分');
-        html += '<td><span class="' + stockClass + '">' + stockLabel + '</span></td>';
-        html += '<td style="text-align:right; font-weight:600; white-space:nowrap;">' +
-          '<input type="number" class="manual-qty-input" data-manual-idx="' + idx + '" value="' + item.qty + '" min="1" ' +
-          'style="width:60px; padding:3px 6px; border:1px solid #ce93d8; border-radius:3px; text-align:right; font-size:0.85rem; font-family:inherit; margin-right:6px;">' +
-          '<button type="button" class="manual-remove-btn" data-manual-idx="' + idx + '" ' +
-          'style="background:none; border:none; color:#c62828; font-size:1.1rem; cursor:pointer; vertical-align:middle;" title="削除">&times;</button>' +
-          '</td>';
-        html += '</tr>';
-      });
-
-      if (html === '') {
-        html = '<tr><td colspan="7" style="text-align:center; color:#999; padding:24px;">研修を選択してください</td></tr>';
+      // ── 手動追加備品 ──
+      if (manualItems.length > 0) {
+        html += '<tr class="table-section-row section-manual"><td colspan="5">手動追加</td></tr>';
+        manualItems.forEach(function (item, idx) {
+          var stockClass = item.stock <= 0 ? 'stock-out' : (item.stock < item.qty ? 'stock-low' : 'stock-ok');
+          var stockLabel = item.stock <= 0 ? '欠品' : (item.stock < item.qty ? '残少' : '十分');
+          html += '<tr style="background:#f3e5f5;">';
+          html += '<td>' + item.name + ' <span class="manual-badge">手動</span></td>';
+          html += '<td>' + item.category + '</td>';
+          html += '<td style="text-align:right;">' + item.stock + '</td>';
+          html += '<td><span class="' + stockClass + '">' + stockLabel + '</span></td>';
+          html += '<td style="text-align:right; white-space:nowrap;">' +
+            '<input type="number" class="manual-qty-input" data-manual-idx="' + idx + '" value="' + item.qty + '" min="1" ' +
+            'style="width:60px; padding:3px 6px; border:1px solid #ce93d8; border-radius:3px; text-align:right; font-size:0.85rem; font-family:inherit; margin-right:6px;">' +
+            '<button type="button" class="manual-remove-btn" data-manual-idx="' + idx + '" ' +
+            'style="background:none; border:none; color:#c62828; font-size:1.1rem; cursor:pointer; vertical-align:middle;" title="削除">&times;</button>' +
+            '</td>';
+          html += '</tr>';
+        });
       }
 
       itemTableBody.innerHTML = html;
+
+      // 全行の数量変更イベント
+      itemTableBody.querySelectorAll('.qty-editable').forEach(function (input) {
+        input.addEventListener('change', function () {
+          var key = this.dataset.qtyKey;
+          var val = parseInt(this.value) || 0;
+          if (val < 0) val = 0;
+          qtyOverrides[key] = val;
+          this.value = val;
+          // 在庫状況を即時更新
+          var row = this.closest('tr');
+          var stockTd = row.querySelectorAll('td')[3];
+          var stockNum = parseInt(row.querySelectorAll('td')[2].textContent) || 0;
+          var cls = stockNum <= 0 ? 'stock-out' : (val > 0 && stockNum < val ? 'stock-low' : 'stock-ok');
+          var lbl = stockNum <= 0 ? '欠品' : (val > 0 && stockNum < val ? '残少' : '十分');
+          stockTd.innerHTML = '<span class="' + cls + '">' + lbl + '</span>';
+        });
+      });
 
       // 手動追加品目の数量変更イベント
       itemTableBody.querySelectorAll('.manual-qty-input').forEach(function (input) {
@@ -782,18 +854,18 @@
     var pickerSelections = {}; // { name: qty }
 
     function getAlreadyInTable() {
-      // テーブルに既にある品目名を収集
       var existing = {};
+      // 共通
+      commonEquipment.forEach(function (item) { existing[item.name] = true; });
+      // 種別固有
       if (currentTraining) {
-        var type = currentTraining.type;
-        (equipmentByType[type] || []).forEach(function (item) {
+        (equipmentByType[currentTraining.type] || []).forEach(function (item) {
           existing[item.name] = true;
         });
       }
-      // オプション備品
-      document.querySelectorAll('.option-check:checked').forEach(function (cb) {
-        var optItems = optionEquipment[cb.value] || [];
-        optItems.forEach(function (item) { existing[item.name] = true; });
+      // オプション
+      document.querySelectorAll('.venue-check:checked').forEach(function (cb) {
+        (optionEquipment[cb.value] || []).forEach(function (item) { existing[item.name] = true; });
       });
       // 手動追加済み
       manualItems.forEach(function (item) { existing[item.name] = true; });
@@ -1091,24 +1163,35 @@
         return;
       }
 
-      // 品目収集（自動＋オプション）
+      // 品目収集（テーブルの入力値を取得）
       var type = currentTraining.type;
       var selectedItems = [];
-      var autoItems = equipmentByType[type] || [];
-      autoItems.forEach(function (item) {
-        var qty = (item.perPerson || 0) * people + (item.perTeam || 0) * teams + (item.fixed || 0);
-        if (qty > 0) selectedItems.push(item.name + ' × ' + qty + '（基本）');
+
+      // 共通備品
+      commonEquipment.forEach(function (item, i) {
+        var qty = getEffectiveQty('common:' + i, calcQty(item, people, teams));
+        if (qty > 0) selectedItems.push(item.name + ' × ' + qty);
       });
-      document.querySelectorAll('.option-check:checked').forEach(function (cb) {
-        var optItems = optionEquipment[cb.value] || [];
-        optItems.forEach(function (item) {
-          var qty = item.perPerson ? item.perPerson * people : (item.fixed || 0);
-          if (qty > 0) selectedItems.push(item.name + ' × ' + qty + '（' + cb.value + '）');
+
+      // 種別固有
+      (equipmentByType[type] || []).forEach(function (item, i) {
+        var qty = getEffectiveQty('type:' + i, calcQty(item, people, teams));
+        if (qty > 0) selectedItems.push(item.name + ' × ' + qty);
+      });
+
+      // オプション
+      var optIdx = 0;
+      document.querySelectorAll('.venue-check:checked').forEach(function (cb) {
+        (optionEquipment[cb.value] || []).forEach(function (item) {
+          var qty = getEffectiveQty('opt:' + optIdx, calcQty(item, people, teams));
+          if (qty > 0) selectedItems.push(item.name + ' × ' + qty);
+          optIdx++;
         });
       });
-      // 手動追加品目
+
+      // 手動追加
       manualItems.forEach(function (item) {
-        selectedItems.push(item.name + ' × ' + item.qty + '（手動追加）');
+        selectedItems.push(item.name + ' × ' + item.qty);
       });
 
       if (selectedItems.length === 0) {
